@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys, glob
+sys.path.append('../lib')
 from pylab import *
 import numpy
 import cPickle
@@ -11,7 +12,7 @@ import model_param as mc
 
 def main(item):
     created_file_ids = []
-    for t in range(mc.get_nt()):
+    for t in range(mc.nt):
         ncfile = Dataset('../time_profiles/cdf/%s_profile_%08d.nc' % (item, t))
 	print 'time_profiles/cdf/%s_profile_%08d.nc' % (item, t)
 
@@ -22,7 +23,7 @@ def main(item):
             id = int(id)
             print "time: ", t, " id: ", id
             if id not in created_file_ids:
-                savefile = Dataset('cdf/%s_profile_%08d.nc' % (item, id), 'w', format='NETCDF4')
+                savefile = Dataset('cdf/%s_profile_%08d.nc' % (item, id), 'w')
                 
                 # Create savefile
                 savefile.createDimension('t', None)
@@ -57,6 +58,5 @@ if __name__ == "__main__":
       'condensed_edge', 'condensed_shell',
       'core','core_env', 
       'core_edge', 'core_shell',
-      'plume', 'condensed_entrain', 'core_entrain',
-      'surface'):
+      'plume', 'surface'): #'condensed_entrain', 'core_entrain',
         main(item)

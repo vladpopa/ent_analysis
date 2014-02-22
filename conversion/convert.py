@@ -1,5 +1,5 @@
-#!/usr/bin/python                                                                                             
-import os, glob, shutil
+#!/usr/bin/python                                                         
+import os, glob, shutil, sys
 import model_param as mc
 
 SAM = mc.sam_directory
@@ -7,7 +7,7 @@ CONVERTER = SAM + '/UTIL/bin3D2nc '
 
 ############################
 ### No need to edit the following script
-def convert(filename):	
+def convert(filename):
 	result = os.system(CONVERTER + filename)
 	print result
 	

@@ -1,15 +1,15 @@
 import numpy, ConfigParser, glob, os
 
 config = ConfigParser.RawConfigParser()
-config.read('config.cfg')
+config.read('../config.cfg')
 model_config = {}
 
 for option in ('ug', 'vg', 'dt', 'dz', 'dy', 'dx'):
-	model_config[option] = config.getfloat('modelconfig', option)
+    model_config[option] = config.getfloat('modelconfig', option)
 for option in ('nz', 'ny', 'nx'):
-	model_config[option] = config.getint('modelconfig', option)
+    model_config[option] = config.getint('modelconfig', option)
 for option in ('case_name', 'input_directory', 'data_directory', 'sam_directory'):
-	model_config[option] = config.get('modelconfig', option)
+    model_config[option] = config.get('modelconfig', option)
 
 model_config['do_entrainment'] = config.getboolean('modelconfig', 'do_entrainment')
 
@@ -26,27 +26,27 @@ data_directory = model_config[ 'data_directory']
 sam_directory = model_config['sam_directory']
 
 if(do_entrainment):
-	nt = len( glob.glob('%s/%s_CORE_*' % (input_directory, case_name)))
+    nt = len( glob.glob('%s/%s_CORE_*' % (input_directory, case_name)))
 else:
-	nt = len( glob.glob('%s/%s_[!A-Z]*' % (input_directory, case_name)))
+    nt = len( glob.glob('%s/%s_[!A-Z]*' % (input_directory, case_name)))
 
 def get_stat():
-	filename = glob.iglob(data_directory + '/*_stat.nc').next()
-	return filename
+    filename = glob.iglob(data_directory + '/*_stat.nc').next()
+    return filename
 
 def time_picker(file_name):
-	f = file_name.split('/')[-1].split('_')
-	
-	if(f[1] == 'CORE'):
-		filelist = glob.glob('%s/core_entrain/*.nc' % data_directory)
-	elif (f[1] == 'CLOUD'):
-		filelist = glob.glob('%s/condensed_entrain/*.nc' % data_directory)
-	else:
-		filelist = glob.glob('%s/variables/*.nc' % data_directory)
-	
-	filelist.sort()
-	index = filelist.index(file_name)
-	return index
+    f = file_name.split('/')[-1].split('_')
+    
+    if(f[1] == 'CORE'):
+        filelist = glob.glob('%s/core_entrain/*.nc' % data_directory)
+    elif (f[1] == 'CLOUD'):
+        filelist = glob.glob('%s/condensed_entrain/*.nc' % data_directory)
+    else:
+        filelist = glob.glob('%s/variables/*.nc' % data_directory)
+    
+    filelist.sort()
+    index = filelist.index(file_name)
+    return index
 
 def index_to_zyx(index):
     z = index / (ny*nx)

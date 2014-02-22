@@ -48,9 +48,9 @@ def run_conversion():
 	convert.convert_stat()
 	
 	# bin3d2nc conversion
-	filelist = glob.glob('./*.bin3D')
+	filelist = glob.glob('%s/*.bin3D' % mc.input_directory)
 	wrapper(pkg, 'convert', 'convert', filelist)
-	
+    
 	# Move the netCDF files to relevant locations
 	filelist = glob.glob('./*.nc')
 	wrapper(pkg, 'nc_transfer', 'transfer', filelist)
