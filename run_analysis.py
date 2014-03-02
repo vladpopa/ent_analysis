@@ -45,10 +45,12 @@ def run_conversion():
 		os.makedirs('%s/condensed_entrain/' % (mc.data_directory))
 	
 	# Generate cloud field statistic 
-	convert.convert_stat()
+	#convert.convert_stat()
 	
 	# bin3d2nc conversion
-	filelist = glob.glob('%s/*.bin3D' % mc.input_directory)
+	#filelist = glob.glob('%s/*.bin3D' % mc.input_directory)
+	filelist = glob.glob('./data/OUT_3D/*.bin3D')
+	print filelist
 	wrapper(pkg, 'convert', 'convert', filelist)
     
 	# Move the netCDF files to relevant locations

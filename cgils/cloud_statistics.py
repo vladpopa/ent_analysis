@@ -86,6 +86,8 @@ if __name__ == '__main__':
         tops = np.append(tops, top)
         masses = np.append(masses, mass)
         
+        print file_list.index(file_name)
+        
     # Discard cloud noise?
     # cloud_stat['duration'] =  lifetimes[1:]
     # cloud_stat['min_height'] =  bases[1:]
