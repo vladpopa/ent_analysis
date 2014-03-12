@@ -9,9 +9,9 @@ def transfer(filename):
 	
 	# netCDF file destination base folder
 	dst = mc.data_directory
-	if(f[1] == 'CORE'):
+	if('CORE' in f):
 		shutil.move(filename, '%s/core_entrain/' % (dst))
-	elif (f[1] == 'CLOUD'):
+	elif ('CLOUD' in f):
 		shutil.move(filename, '%s/condensed_entrain/' % (dst))
 	else:
 		shutil.move(filename, '%s/variables/' % (dst))
