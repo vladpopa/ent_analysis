@@ -109,7 +109,7 @@ if __name__ == '__main__':
     
     # Collect all files containing conditionally sampled condensed points
     if args.tracked:
-        input_files = os.path.join('../cloudtracker/pkl', 'cloud_data_*.pkl')   
+        input_files = os.path.join('../analysis/bomex/cloudtracker/pkl', 'cloud_data_*.pkl')   
         file_list = glob.glob(input_files)
         file_list.sort()
     else:
@@ -121,11 +121,12 @@ if __name__ == '__main__':
     # Calculate and store cloud shaded areas for all clouds
     cloud_areas = {}
     for n, file_name in enumerate(file_list):
-        print("Calculating shaded areas at step %d" % int(file_name[-11:-4]))
         if args.tracked:
-            cloud_areas[n] = tracked_shaded_area(file_name)
+			print("Calculating shaded areas at step %d" % int(file_name[-11:-4]))
+			cloud_areas[n] = tracked_shaded_area(file_name)
         else:
-            cloud_areas[n] = snapshot_shaded_area(file_name)
+			print("Calculating shaded areas at step %d" % int(file_name[-11:-3]))
+			cloud_areas[n] = snapshot_shaded_area(file_name)
 
     # Save cloud shaded areas
     if args.tracked:

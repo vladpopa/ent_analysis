@@ -1,52 +1,15 @@
-import numpy, ConfigParser, glob, os
+import numpy
 
-config = ConfigParser.RawConfigParser()
-config.read('config.cfg')
-model_config = {}
+nt, nz, ny, nx = 510, 208, 256, 256
 
-for option in ('ug', 'vg', 'dt', 'dz', 'dy', 'dx'):
-    model_config[option] = config.getfloat('modelconfig', option)
-for option in ('nz', 'ny', 'nx'):
-    model_config[option] = config.getint('modelconfig', option)
-for option in ('case_name', 'input_directory', 'data_directory', 'sam_directory'):
-    model_config[option] = config.get('modelconfig', option)
+dt, dz, dy, dx = 60., 25., 25., 25.
 
-model_config['do_entrainment'] = config.getboolean('modelconfig', 'do_entrainment')
+ug = -8. 
+vg = 0.
 
-nz, ny, nx = model_config['nz'], model_config['ny'], model_config['nx']
-dt, dx, dy, dz = model_config['dt'], model_config['dz'], model_config['dy'], model_config['dz']
-
-ug, vg = model_config['ug'], model_config['vg']
-
-case_name = model_config['case_name']
-do_entrainment = model_config['do_entrainment']
-
-input_directory = model_config[ 'input_directory']
-data_directory = model_config[ 'data_directory']
-sam_directory = model_config['sam_directory']
-
-if(do_entrainment):
-    nt = len( glob.glob('%s/%s_CORE_*' % (input_directory, case_name)))
-else:
-    nt = len( glob.glob('%s/%s_[!A-Z]*' % (input_directory, case_name)))
-
-def get_stat():
-    filename = glob.iglob(data_directory + '/*_stat.nc').next()
-    return filename
-
-def time_picker(file_name):
-    f = file_name.split('/')[-1].split('_')
-    
-    if('CORE' in f):
-        filelist = glob.glob('%s/core_entrain/*.nc' % data_directory)
-    elif ('CLOUD' in f):
-        filelist = glob.glob('%s/condensed_entrain/*.nc' % data_directory)
-    else:
-        filelist = glob.glob('%s/variables/*.nc' % data_directory)
-    
-    filelist.sort()
-    index = filelist.index(file_name)
-    return index
+model_dir = '../../gcssarm/SAM' 
+analysis_dir = '../../gcssarm/analysis' 
+data_dir = '../../gcssarm/data/' 
 
 def index_to_zyx(index):
     z = index / (ny*nx)

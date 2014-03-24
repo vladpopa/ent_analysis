@@ -1,30 +1,31 @@
 #!/usr/bin/env python
+#Runtime (690, 130, 128, 128): 3 hours 40 minutes
 
-import sys, glob
-sys.path.append('../lib')
-sys.path.append('..')
+
+import sys
 from pylab import *
 import numpy
+#import pcontour
 import cPickle
-try:
-	from netCDF4 import Dataset
-except:
-	try:
-		from netCDF3 import Dataset
-	except:
-		from pupynere import netcdf_file as Dataset
+import glob
+from netCDF3 import Dataset
 import networkx
 
-import model_param as mc
+from thermo import SAM
+
+import os
+model_name = os.getcwd().split('/ANALYSIS/')[-1].split('/')[0]
+MC = __import__(model_name)
 
 def main(item):
+
     created_file_ids = []
-    for t in range(mc.nt):
-        ncfile = Dataset('../time_profiles/cdf/%s_profile_%08d.nc' % (item, t))
-        print 'time_profiles/cdf/%s_profile_%08d.nc' % (item, t)
+    for t in range(MC.nt):
+        ncfile = Dataset('../TIME_PROFILES/cdf/%s_profile_%08d.nc' % (item, t))
 
         ids = ncfile.variables['ids'][:]
         z = ncfile.variables['z'][:]
+        
         
         for n, id in enumerate(ids):
             id = int(id)
@@ -60,9 +61,5 @@ def main(item):
         ncfile.close()
    
 if __name__ == "__main__":
-    for item in ('condensed', 'condensed_env', 
-      'condensed_edge', 'condensed_shell',
-      'core','core_env', 
-      'core_edge', 'core_shell',
-      'plume', 'surface', 'condensed_entrain', 'core_entrain'):
+    for item in ('cloud_env',):
         main(item)

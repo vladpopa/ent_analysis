@@ -54,7 +54,9 @@ def cloud_statistics(file_name):
     qn = ma.masked_invalid(data.variables['QN'][...])
     rho = ma.masked_invalid(data.variables['RHO'][...])
     mass = np.mean(np.sum(area*rho*mc.dz, axis=1))
-    # Need to add QV and QN here
+    # May need to consider QV and QN for mass flux
+    
+    data.close()
     
     return lifetime, base, top, mass
 
@@ -86,7 +88,7 @@ if __name__ == '__main__':
         tops = np.append(tops, top)
         masses = np.append(masses, mass)
         
-        print file_list.index(file_name)
+        print(file_list.index(file_name))
         
     # Discard cloud noise?
     # cloud_stat['duration'] =  lifetimes[1:]

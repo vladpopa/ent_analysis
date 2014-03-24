@@ -97,7 +97,7 @@ def main(filename):
           'MFTETCOR': var_calcs.mftetcor,
     }
     
-    # Automatically load time step from output file name
+    # Automatically load time step from output file name   
     time = mc.time_picker(filename)
     
     # Load CDF Files
@@ -149,7 +149,6 @@ def main(filename):
     nc_file.close()
    
 if __name__ == "__main__":
-
     files = glob.glob('%s/core_entrain/*.nc' % mc.data_directory)
     files.sort()
     

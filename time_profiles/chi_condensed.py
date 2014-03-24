@@ -2,19 +2,21 @@
 
 from netCDF4 import Dataset
 import numpy
+import sys
+sys.path.append('/home/vpopa/repos/python')
 from thermo import SAM
 import glob
 
-import model_param as mc
+import cgils as mc
 
 def makechi(filename):
     key = int(filename.split('/')[-1].split('_')[-1].split('.')[0])
     print "chi_condensed_profile", key
 
-    condensedfile = Dataset('cdf/condensed_profile_%08d.nc' % key)
-    envfile = Dataset('cdf/condensed_env_profile_%08d.nc' % key)
-    shellfile = Dataset('cdf/condensed_shell_profile_%08d.nc' % key)
-    statfile = Dataset(mc.get_stat())
+    condensedfile = Dataset('/tera/vpopa/cgils/analysis/time_profiles/cdf/condensed_profile_%08d.nc' % key)
+    envfile = Dataset('/tera/vpopa/cgils/analysis/time_profiles/cdf/condensed_env_profile_%08d.nc' % key)
+    shellfile = Dataset('/tera/vpopa/cgils/analysis/time_profiles/cdf/condensed_shell_profile_%08d.nc' % key)
+    statfile = Dataset('/tera/vpopa/cgils/data/ENT_S6_IDEAL_301K_b_stat.nc')
  
     t = numpy.atleast_1d(condensedfile.variables['ids'][:])
 
@@ -101,7 +103,7 @@ def makechi(filename):
 
 
 if __name__ == '__main__':
-    filelist = glob.glob('cdf/condensed_env*.nc')
+    filelist = glob.glob('/tera/vpopa/cgils/analysis/time_profiles/cdf/condensed_env*.nc')
     filelist.sort()
 
     for filename in filelist:

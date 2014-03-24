@@ -18,8 +18,9 @@ if __name__ == "__main__":
     tracked_areas = np.load('npy/tracked_shaded_area.npy')  
     tracked_l = np.sqrt(tracked_areas*mc.dx*mc.dy)
     
-    bins = np.linspace(0., 4000., 100)
-
+    #bins = np.linspace(0., 4000., 100)
+    bins = np.linspace(0., 1500, 151)
+	
     # Remove extrema
     # mask1 = (tracked_l >= tracked_l.min()) & (tracked_l <= tracked_l.max())
 
@@ -37,7 +38,8 @@ if __name__ == "__main__":
     print('Snapshot shaded area histogram slope: {0:.2f}' \
         .format(snapshot_slope))
         
-    mask = (bin_x > 200) & (bin_x < 900)
+    #mask = (bin_x > 200) & (bin_x < 900)
+    mask = (bin_x > 100) & (bin_x < 900)	
     tracked_slope, tracked_intercept = polyfit(np.log(bin_x[mask]), \
         np.log(tracked_h[mask]), 1)
     print('Tracked shaded area histogram slope: {0:.2f}' \
@@ -61,9 +63,9 @@ if __name__ == "__main__":
     fig = plt.figure(1, figsize=(3.125, 3.125))
     fig.clf()
     ax = fig.add_subplot(111)
-    ax.plot(x, snapshot_h, 'k-', color='k')    
-    ax.plot(bin_x, (np.exp(snapshot_intercept))*bin_x**snapshot_slope, 'r-', \
-        dashes=(5,2))
+    # ax.plot(x, snapshot_h, 'k-', color='k')    
+    # ax.plot(bin_x, (np.exp(snapshot_intercept))*bin_x**snapshot_slope, 'r-', \
+    #     dashes=(5,2))
     ax.plot(x, tracked_h, 'k-', color='0.5')    
     ax.plot(bin_x, (np.exp(tracked_intercept))*bin_x**tracked_slope, 'b-', \
         dashes=(2,2))
@@ -79,12 +81,25 @@ if __name__ == "__main__":
     ax.set_ylabel('Number of Clouds per 10 m Bin', fontsize=8)
     ax.set_title('Cloud Size Distribution, SST = 297 K', fontsize=8)
     
-    ax.set_xticks((50, 100, 500, 1000, 2000))
-    ax.set_xticklabels(('50', '100', '500', '1000', '2000'))
-    ax.set_yticks((1e1, 1e2, 1e3, 1e4))    
+    # ax.set_xticks((50, 100, 500, 1000, 2000))
+    # ax.set_xticklabels(('50', '100', '500', '1000', '2000'))
+    # ax.set_yticks((1e1, 1e2, 1e3, 1e4))    
+    # 
+    # ax.set_xlim(20, 4000)
+    # ax.set_ylim(1, 2e3)    
 
-    ax.set_xlim(20, 4000)
-    ax.set_ylim(1, 2e3)    
+    ax.set_xticks((50, 100, 500, 1000))
+    ax.set_xticklabels(('50', '100', '500', '1000'))
+    ax.set_yticks((1e1, 1e2, 1e3, 1e4))    
+    
+    ax.set_xlim(20, 1500)
+    ax.set_ylim(1, 2e4) 
+
+    # ax.set_xticks((50, 100, 500, 1000), ('50', '100', '500','1000'))
+    # ax.set_yticks((1, 1e1, 1e2, 1e3, 1e4), ('1', '10', '10$^{2}$', '10$^{3}$', '10$^{4}$'))
+    # 
+    # #axis([20, 1500, 1, 3e4])
+    # ax.set_xlim(20, 1500)
 
     # Save plot in png and eps formats
     if not os.path.exists('png'):
