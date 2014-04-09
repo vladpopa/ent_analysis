@@ -10,7 +10,7 @@ import numpy.ma
 sys.path.append('/home/vpopa/repos/python')
 from thermo import SAM
 
-import bomex as mc
+import cgils as mc
 
 def main():
     sample_types = ('CORE', 'ENV', 'PLUME')
@@ -23,8 +23,8 @@ def main():
 
             
         nc_files = {}
-        nc_files['CORE'] = Dataset('/tera/vpopa/bomex/analysis/time_profiles/cdf/core_profile_%08d.nc' % l)
-        nc_files['PLUME'] = Dataset('/tera/vpopa/bomex/analysis/time_profiles/cdf/plume_profile_%08d.nc' % l)
+        nc_files['CORE'] = Dataset('/tera/vpopa/cgils/analysis/time_profiles/cdf/core_profile_%08d.nc' % l)
+        nc_files['PLUME'] = Dataset('/tera/vpopa/cgils/analysis/time_profiles/cdf/plume_profile_%08d.nc' % l)	
         area = nc_files['CORE'].variables['AREA'][:]
         mask = (area > 0.)
         area[~mask] = 0.
@@ -37,11 +37,11 @@ def main():
 
 #        nc_files['EDGE'] = Dataset('../time_profiles/cdf/core_edge_profile_%08d.nc' % l)
 #        nc_files['SHELL'] = Dataset('../time_profiles/cdf/core_shell_profile_%08d.nc' % l)
-        nc_files['ENV'] = Dataset('/tera/vpopa/bomex/analysis/time_profiles/cdf/core_env_profile_%08d.nc' % l)
-        entrain_file = Dataset('/tera/vpopa/bomex/analysis/time_profiles/cdf/core_entrain_profile_%08d.nc' % l)
-        surface_file = Dataset('/tera/vpopa/bomex/analysis/time_profiles/cdf/surface_profile_%08d.nc' % l)
-        chi_file = Dataset('/tera/vpopa/bomex/analysis/time_profiles/cdf/core_chi_profile_%08d.nc' % l)
-        stat_file = Dataset('/tera/vpopa/bomex/data/stat_1min.nc')
+        nc_files['ENV'] = Dataset('/tera/vpopa/cgils/analysis/time_profiles/cdf/core_env_profile_%08d.nc' % l)
+        entrain_file = Dataset('/tera/vpopa/cgils/analysis/time_profiles/cdf/core_entrain_profile_%08d.nc' % l)
+        surface_file = Dataset('/tera/vpopa/cgils/analysis/time_profiles/cdf/surface_profile_%08d.nc' % l)
+        chi_file = Dataset('/tera/vpopa/cgils/analysis/time_profiles/cdf/core_chi_profile_%08d.nc' % l)	
+        stat_file = Dataset('/tera/vpopa/cgils/data/ENT_S6_IDEAL_301K_b_stat.nc')
 
         z = nc_files['CORE'].variables['z'][:]
         z = numpy.resize(z, mask.shape)
@@ -106,11 +106,11 @@ def main():
         lsrhoa = stat_file.variables['RHO'][l, :]*stat_file.variables['VTETCOR'][l,:]
         
         qc = stat_file.variables['QTCOR'][l, :]/1000.
-        qe = stat_file.variables['QTCEN'][l, :]/1000.
+        # qe = stat_file.variables['QTCEN'][l, :]/1000.
         tc = stat_file.variables['TLCOR'][l, :]
-        te = stat_file.variables['TLCEN'][l, :]
+        # te = stat_file.variables['TLCEN'][l, :]
         wc = stat_file.variables['WCOR'][l, :]
-        we = stat_file.variables['WCEN'][l, :]
+        # we = stat_file.variables['WCEN'][l, :]
         
         dwdt = entrain_file.variables['DWDT'][:]
         E = entrain_file.variables['ETETCOR'][:]
@@ -124,7 +124,7 @@ def main():
         
         massflux = entrain_file.variables['MFTETCOR'][:]
         volume = entrain_file.variables['VTETCOR'][:]
-       
+               
         cluster_dict['DWDT'] = dwdt[mask]
         cluster_dict['E'] = E[mask]
         cluster_dict['D'] = D[mask]
@@ -135,49 +135,49 @@ def main():
         cluster_dict['EW'] = Ew[mask]
         cluster_dict['DW'] = Dw[mask]
         
-        Aq = ((Eq/E) - qe)/(qc - qe)
-        Bq = (qc - (Dq/D))/(qc - qe)
-        At = ((Et/E) - te)/(tc - te)
-        Bt = (tc - (Dt/D))/(tc - te)
-        Aw = ((Ew/E) - we)/(wc - we)
-        Bw = (wc -(Dw/D))/(wc - we)
-
-        cluster_dict['AQ'] = Aq[mask]
-        cluster_dict['BQ'] = Bq[mask]
-        cluster_dict['AT'] = At[mask]
-        cluster_dict['BT'] = Bt[mask]
-        cluster_dict['AW'] = Aw[mask]
-        cluster_dict['BW'] = Bw[mask]
-
-        Eq_T = ((qc*(E-D) - (Eq-Dq))/(qc-qe))
-        Dq_T = ((qe*(E-D) - (Eq-Dq))/(qc-qe))
-        Et_T = ((tc*(E-D) - (Et-Dt))/(tc-te))
-        Dt_T = ((te*(E-D) - (Et-Dt))/(tc-te))
-        Ew_T = ((wc*(E-D) - (Ew-Dw))/(wc-we))
-        Dw_T = ((we*(E-D) - (Ew-Dw))/(wc-we))
-
-        cluster_dict['EQ_T'] = Eq_T[mask]
-        cluster_dict['DQ_T'] = Dq_T[mask]
-        cluster_dict['ET_T'] = Et_T[mask]
-        cluster_dict['DT_T'] = Dt_T[mask]
-        cluster_dict['EW_T'] = Ew_T[mask]
-        cluster_dict['DW_T'] = Dw_T[mask]
+        # Aq = ((Eq/E) - qe)/(qc - qe)
+        # Bq = (qc - (Dq/D))/(qc - qe)
+        # At = ((Et/E) - te)/(tc - te)
+        # Bt = (tc - (Dt/D))/(tc - te)
+        # Aw = ((Ew/E) - we)/(wc - we)
+        # Bw = (wc -(Dw/D))/(wc - we)
+        # 
+        # cluster_dict['AQ'] = Aq[mask]
+        # cluster_dict['BQ'] = Bq[mask]
+        # cluster_dict['AT'] = At[mask]
+        # cluster_dict['BT'] = Bt[mask]
+        # cluster_dict['AW'] = Aw[mask]
+        # cluster_dict['BW'] = Bw[mask]
+        # 
+        # Eq_T = ((qc*(E-D) - (Eq-Dq))/(qc-qe))
+        # Dq_T = ((qe*(E-D) - (Eq-Dq))/(qc-qe))
+        # Et_T = ((tc*(E-D) - (Et-Dt))/(tc-te))
+        # Dt_T = ((te*(E-D) - (Et-Dt))/(tc-te))
+        # Ew_T = ((wc*(E-D) - (Ew-Dw))/(wc-we))
+        # Dw_T = ((we*(E-D) - (Ew-Dw))/(wc-we))
+        
+        # cluster_dict['EQ_T'] = Eq_T[mask]
+        # cluster_dict['DQ_T'] = Dq_T[mask]
+        # cluster_dict['ET_T'] = Et_T[mask]
+        # cluster_dict['DT_T'] = Dt_T[mask]
+        # cluster_dict['EW_T'] = Ew_T[mask]
+        # cluster_dict['DW_T'] = Dw_T[mask]
         
         cluster_dict['EPSILON'] = (E/massflux)[mask]
         cluster_dict['Q_EPSILON'] = (Eq/massflux)[mask]
         cluster_dict['T_EPSILON'] = (Et/massflux)[mask]
         cluster_dict['W_EPSILON'] = (Ew/massflux)[mask]
-        cluster_dict['Q_EPSILON_T'] = (Eq_T/massflux)[mask]
-        cluster_dict['T_EPSILON_T'] = (Et_T/massflux)[mask]
-        cluster_dict['W_EPSILON_T'] = (Ew_T/massflux)[mask]
-
+        # cluster_dict['Q_EPSILON_T'] = (Eq_T/massflux)[mask]
+        # cluster_dict['T_EPSILON_T'] = (Et_T/massflux)[mask]
+        # cluster_dict['W_EPSILON_T'] = (Ew_T/massflux)[mask]
+        
         cluster_dict['DELTA'] = (D/massflux)[mask]
         cluster_dict['Q_DELTA'] = (Dq/massflux)[mask]
         cluster_dict['T_DELTA'] = (Dt/massflux)[mask]
         cluster_dict['W_DELTA'] = (Dw/massflux)[mask]
-        cluster_dict['Q_DELTA_T'] = (Dq_T/massflux)[mask]
-        cluster_dict['T_DELTA_T'] = (Dt_T/massflux)[mask]
-        cluster_dict['W_DELTA_T'] = (Dw_T/massflux)[mask]
+        # cluster_dict['Q_DELTA_T'] = (Dq_T/massflux)[mask]
+        # cluster_dict['T_DELTA_T'] = (Dt_T/massflux)[mask]
+        # cluster_dict['W_DELTA_T'] = (Dw_T/massflux)[mask]
 
         for var in ('DWDZ', 'DPDZ', 'THETAV_LAPSE'):
             temp = nc_files['CORE'].variables[var][:]

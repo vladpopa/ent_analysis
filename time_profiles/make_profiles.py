@@ -144,7 +144,7 @@ def main(filename):
                  'condensed_edge', 'condensed_env',
                  'core_shell', 
                  'core_edge', 'core_env', 
-                 'plume', 'surface', 'condensed_entrain', 'core_entrain'):            
+                 'plume'):            
 		 
         savefile, variables = create_savefile(time, data, vars, item)
         savefiles[item] = savefile

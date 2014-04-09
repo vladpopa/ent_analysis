@@ -44,20 +44,20 @@ def run_conversion():
 	if not os.path.exists('%s/condensed_entrain/' % (mc.data_directory)):
 		os.makedirs('%s/condensed_entrain/' % (mc.data_directory))
 	
-    # # Generate cloud field statistic 
-    # convert.convert_stat()
-    # 
-    # # bin3d2nc conversion
-    # filelist = glob.glob('%s/*.bin3D' % mc.input_directory)
-    # wrapper(pkg, 'convert', 'convert', filelist)
-    #     
-    # # Move the netCDF files to relevant locations
-    # filelist = glob.glob('./*.nc')
-    # wrapper(pkg, 'nc_transfer', 'transfer', filelist)
-    # 
-    # # generate_tracking
-    # filelist = glob.glob('%s/variables/*.nc' % (mc.data_directory))
-    # wrapper(pkg, 'generate_tracking', 'main', filelist)
+    # Generate cloud field statistic
+	convert.convert_stat()
+    
+    # bin3d2nc conversion
+	filelist = glob.glob('%s/*.bin3D' % mc.input_directory)
+	wrapper(pkg, 'convert', 'convert', filelist)
+        
+    # Move the netCDF files to relevant locations
+	filelist = glob.glob('./*.nc')
+	wrapper(pkg, 'nc_transfer', 'transfer', filelist)
+    
+    # generate_tracking
+	filelist = glob.glob('%s/variables/*.nc' % (mc.data_directory))
+	wrapper(pkg, 'generate_tracking', 'main', filelist)
 	
 def run_cloudtracker():
 	# Change the working directory for cloudtracker
@@ -69,7 +69,7 @@ def run_cloudtracker():
     
     # Swap input directory for cloudtracker 
 	model_config['input_directory'] = mc.data_directory + '/tracking/'
-    #cloudtracker.main.main(model_config) 
+	cloudtracker.main.main(model_config) 
 
 def run_profiler():
 	### Time Profiles
@@ -87,12 +87,11 @@ def run_profiler():
 	if(mc.do_entrainment):
 		filelist = glob.glob('%s/core_entrain/*.nc' % (mc.data_directory))
 		wrapper(pkg, 'core_entrain_profiles', 'main', filelist)
-		sys.exit()
 		
 		filelist = glob.glob('%s/condensed_entrain/*.nc' % (mc.data_directory))
 		wrapper(pkg, 'condensed_entrain_profiles', 'main', filelist)
 	
-	# Chi Profiles
+	# # Chi Profiles
 	filelist = glob.glob('cdf/core_env*.nc')
 	wrapper(pkg, 'chi_core', 'makechi', filelist)
 	
@@ -114,10 +113,10 @@ def run_id_profiles():
 	wrapper(pkg, 'all_profiles', 'main', profiles)
 
 if __name__ == '__main__':
-	run_conversion()
-	run_cloudtracker()
-	#run_profiler()
-	run_id_profiles()
+	#run_conversion()
+	#run_cloudtracker()
+	run_profiler()
+	#run_id_profiles()
 	
 	print 'Entrainment analysis completed'
 	

@@ -24,7 +24,7 @@ def main():
         cluster_dict = {}          
         nc_files = {}
         nc_files['CONDENSED'] = Dataset('/tera/vpopa/%s/analysis/time_profiles/cdf/condensed_profile_%08d.nc' % (dataset, l))
-        nc_files['PLUME'] = Dataset('/tera/vpopa/%s/analysis/time_profiles/cdf/plume_profile_%08d.nc' % (dataset, l))
+        nc_files['PLUME'] = Dataset('/tera/vpopa/%s/analysis/time_profiles/cdf/plume_profile_%08d.nc' % (dataset, l))    	
         area = nc_files['CONDENSED'].variables['AREA'][:]
         mask = (area > 0.)
         area[~mask] = 0.
@@ -45,7 +45,6 @@ def main():
         entrain_file = Dataset('/tera/vpopa/%s/analysis/time_profiles/cdf/condensed_entrain_profile_%08d.nc' % (dataset, l))
         surface_file = Dataset('/tera/vpopa/%s/analysis/time_profiles/cdf/surface_profile_%08d.nc' % (dataset, l))
         chi_file = Dataset('/tera/vpopa/%s/analysis/time_profiles/cdf/condensed_chi_profile_%08d.nc' % (dataset, l))
-        stat_file = Dataset('/tera/vpopa/%s/data/ENT_S6_IDEAL_301K_b_stat.nc' % dataset)
         
         z = nc_files['CONDENSED'].variables['z'][:]
         z = numpy.resize(z, mask.shape)
@@ -94,33 +93,31 @@ def main():
         cluster_dict['CHI'] = chi[mask]
 #        cluster_dict['CHI_SHELL'] = chi_shell[mask]
 
-        # tvp don't have netCDF variables
-        # surface = surface_file.variables['CONDENSED_SURFACE'][:]
-        # cluster_dict['SURFACE'] = surface[mask]
+        surface = surface_file.variables['CONDENSED_SURFACE'][:]
+        cluster_dict['SURFACE'] = surface[mask]
 
         lsmf = stat_file.variables['MFTETCLD'][l, :]
         lsrhoa = stat_file.variables['RHO'][l, :]*stat_file.variables['VTETCLD'][l,:]
 
-        # tvp don't have netCDF variables
-        # E = entrain_file.variables['ETETCLD'][:]
-        # D = entrain_file.variables['DTETCLD'][:]
-        # massflux = entrain_file.variables['MFTETCLD'][:]
-        # volume = entrain_file.variables['VTETCLD'][:]
-        # epsilon = E/massflux
-        # delta = D/massflux
-        # wepsilon = E/rho/volume
-        # wdelta = D/rho/volume
-        #        
-        # cluster_dict['E'] = E[mask]
-        # cluster_dict['D'] = D[mask]
-        # cluster_dict['EPSILON'] = epsilon[mask]
-        # cluster_dict['DELTA'] = delta[mask]
-        # cluster_dict['EPSILON_LS'] = (E/lsmf)[mask]
-        # cluster_dict['DELTA_LS'] = (D/lsmf)[mask]
-        # cluster_dict['WEPSILON'] = wepsilon[mask]
-        # cluster_dict['WDELTA'] = wdelta[mask]
-        # cluster_dict['WEPSILON_LS'] = (E/lsrhoa)[mask]
-        # cluster_dict['WDELTA_LS'] = (D/lsrhoa)[mask]
+        E = entrain_file.variables['ETETCLD'][:]
+        D = entrain_file.variables['DTETCLD'][:]
+        massflux = entrain_file.variables['MFTETCLD'][:]
+        volume = entrain_file.variables['VTETCLD'][:]
+        epsilon = E/massflux
+        delta = D/massflux
+        wepsilon = E/rho/volume
+        wdelta = D/rho/volume
+               
+        cluster_dict['E'] = E[mask]
+        cluster_dict['D'] = D[mask]
+        cluster_dict['EPSILON'] = epsilon[mask]
+        cluster_dict['DELTA'] = delta[mask]
+        cluster_dict['EPSILON_LS'] = (E/lsmf)[mask]
+        cluster_dict['DELTA_LS'] = (D/lsmf)[mask]
+        cluster_dict['WEPSILON'] = wepsilon[mask]
+        cluster_dict['WDELTA'] = wdelta[mask]
+        cluster_dict['WEPSILON_LS'] = (E/lsrhoa)[mask]
+        cluster_dict['WDELTA_LS'] = (D/lsrhoa)[mask]
 
         for var in (('MF', mf), ('AREA', area)):
             temp = var[1]
@@ -147,7 +144,6 @@ def main():
     for item in stats_dict:
         stats_dict[item] = numpy.hstack(stats_dict[item])
 
-    #print(stats_dict['TIME'])
     cPickle.dump(stats_dict, open('pkl/condensed_stats.pkl', 'wb'))
     
 if __name__ == "__main__":
