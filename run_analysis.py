@@ -15,9 +15,11 @@ import cloudtracker.main
 cwd = os.getcwd()
 
 # Output profile names
-profiles = {'condensed', 'condensed_env', 'condensed_edge', \
-	'condensed_shell' , 'core', 'core_env', 'core_edge', 'core_shell', \
-	'plume', 'condensed_entrain', 'core_entrain', 'surface'}
+#profiles = {'condensed', 'condensed_env', 'condensed_edge', \
+#	'condensed_shell' , 'core', 'core_env', 'core_edge', 'core_shell', \
+#	'plume', 'condensed_entrain', 'core_entrain', 'surface'}
+
+profiles = {'condensed', 'plume', 'core'}
 
 def wrapper(module_name, script_name, function_name, filelist):
 	pkg = __import__ (module_name, globals(), locals(), ['*'])
@@ -66,10 +68,10 @@ def run_cloudtracker():
     
     # Update nt
 	model_config['nt'] = mc.nt
-    
+
     # Swap input directory for cloudtracker 
-	model_config['input_directory'] = mc.data_directory + '/tracking/'
-    #cloudtracker.main.main(model_config) 
+        model_config['input_directory'] = mc.data_directory + '/tracking/'
+        cloudtracker.main.main(model_config) 
 
 def run_profiler():
 	### Time Profiles
@@ -114,8 +116,8 @@ def run_id_profiles():
 	wrapper(pkg, 'all_profiles', 'main', profiles)
 
 if __name__ == '__main__':
-	run_conversion()
-	run_cloudtracker()
+	#run_conversion()
+        #run_cloudtracker()
 	#run_profiler()
 	run_id_profiles()
 	
