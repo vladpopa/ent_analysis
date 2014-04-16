@@ -6,14 +6,14 @@ model_config = {}
 
 for option in ('ug', 'vg', 'dt', 'dz', 'dy', 'dx'):
     model_config[option] = config.getfloat('modelconfig', option)
-for option in ('nz', 'ny', 'nx'):
+for option in ('nt', 'nz', 'ny', 'nx'):
     model_config[option] = config.getint('modelconfig', option)
 for option in ('case_name', 'input_directory', 'data_directory', 'sam_directory'):
     model_config[option] = config.get('modelconfig', option)
 
 model_config['do_entrainment'] = config.getboolean('modelconfig', 'do_entrainment')
 
-nz, ny, nx = model_config['nz'], model_config['ny'], model_config['nx']
+nt, nz, ny, nx = model_config['nt'], model_config['nz'], model_config['ny'], model_config['nx']
 dt, dx, dy, dz = model_config['dt'], model_config['dz'], model_config['dy'], model_config['dz']
 
 ug, vg = model_config['ug'], model_config['vg']
@@ -27,11 +27,11 @@ sam_directory = model_config['sam_directory']
 
 if(do_entrainment):
     nt = len( glob.glob('%s/%s_CORE_*' % (input_directory, case_name)))
-else:
-    nt = len( glob.glob('%s/%s_[!A-Z]*' % (input_directory, case_name)))
+#else:
+#    nt = len( glob.glob('%s/%s_[!A-Z]*' % (input_directory, case_name)))
 
 def get_stat():
-    filename = glob.iglob(data_directory + '/*_stat.nc').next()
+    filename = glob.iglob(data_directory + '/stat*.nc').next()
     return filename
 
 def time_picker(file_name):
