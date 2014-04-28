@@ -60,10 +60,10 @@ def main(item):
         ncfile.close()
    
 if __name__ == "__main__":
-    #for item in ('condensed', 'condensed_env', 
-    #  'condensed_edge', 'condensed_shell',
-    #  'core','core_env', 
-    #  'core_edge', 'core_shell',
-    #  'plume', 'surface', 'condensed_entrain', 'core_entrain'):
+   # for item in ('condensed', 'condensed_env', 
+   #   'condensed_edge', 'condensed_shell',
+   #   'core','core_env', 
+   #   'core_edge', 'core_shell',
+   #   'plume', 'surface', 'condensed_entrain', 'core_entrain'):
     for item in ('core', 'condensed', 'plume'):
         main(item)
