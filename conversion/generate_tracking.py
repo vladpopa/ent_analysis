@@ -20,16 +20,17 @@ import sys
 from pylab import *
 from netCDF4 import Dataset
 import glob
-
+sys.path.append('/home/vpopa/repos/python')
 from thermo import SAM
-import model_param as mc
+import ent_analysis.lib.model_param as mc
 
 def main(filename):
     time_step = mc.time_picker(filename)
     
     # Load all the data needed to calculation core, clouds, updrafts, etc
     # at the current time_step.
-    nc_file = Dataset(filename)    
+    nc_file = Dataset(filename)
+
     tabs_field = nc_file.variables['TABS'][0,:].astype(double)
     qv_field = nc_file.variables['QV'][0,:].astype(double)/1000.
     qn_field = nc_file.variables['QN'][0,:].astype(double)/1000.

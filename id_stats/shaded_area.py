@@ -16,12 +16,11 @@ $ python shaded_area.py -t
 
 from __future__ import division, print_function
 import sys
-sys.path.append('../lib')
 import glob
 import os
 import numpy as np
 import numpy.ma as ma
-import model_param as mc
+import ent_analysis.lib.model_param as mc
 import argparse
 from netCDF4 import Dataset
 import scipy.ndimage.measurements as measurements
@@ -103,13 +102,13 @@ if __name__ == '__main__':
         action="store_true")  
     args = parser.parse_args()
       
-    # Create npy directory to store cloud areas
-    if not os.path.exists('npy'):
-        os.makedirs('npy')
+    # Create pkl directory to store cloud areas
+    if not os.path.exists('pkl'):
+        os.makedirs('pkl')
     
     # Collect all files containing conditionally sampled condensed points
     if args.tracked:
-        input_files = os.path.join('../analysis/bomex/cloudtracker/pkl', 'cloud_data_*.pkl')   
+        input_files = os.path.join('../cloudtracker/pkl', 'cloud_data_*.pkl')   
         file_list = glob.glob(input_files)
         file_list.sort()
     else:
@@ -130,6 +129,6 @@ if __name__ == '__main__':
 
     # Save cloud shaded areas
     if args.tracked:
-        np.save('npy/tracked_shaded_area.npy', np.hstack(cloud_areas.values()))
+        pickle.dump(np.hstack(cloud_areas.values()), open('pkl/tracked_areas.pkl', 'wb'))
     else:
-        np.save('npy/snapshot_shaded_area.npy', np.hstack(cloud_areas.values()))
+        pickle.dump(np.hstack(cloud_areas.values()), open('pkl/true_areas.pkl', 'wb'))

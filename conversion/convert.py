@@ -1,6 +1,6 @@
 #!/usr/bin/python                                                         
 import os, glob, shutil, sys
-import model_param as mc
+import ent_analysis.lib.model_param as mc
 
 SAM = mc.sam_directory
 CONVERTER = SAM + '/UTIL/bin3D2nc '
@@ -15,8 +15,7 @@ def convert(filename):
 		print "Process aborted."
 		
 def convert_stat():
-	stat_name = glob.iglob(SAM + '/OUT_STAT/*.stat').next()
-	
+	stat_name = glob.iglob(SAM + '/OUT_STAT/%s*.stat' % mc.case_name).next()	
 	print "Converting stat file..."
 	print stat_name
 	

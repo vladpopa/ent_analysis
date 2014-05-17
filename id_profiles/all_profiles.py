@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-import sys, glob
-sys.path.append('../lib')
-sys.path.append('..')
+import sys, glob, os
 from pylab import *
 import numpy
 import cPickle
@@ -15,7 +13,7 @@ except:
 		from pupynere import netcdf_file as Dataset
 import networkx
 
-import model_param as mc
+import ent_analysis.lib.model_param as mc
 
 def main(item):
     created_file_ids = []
@@ -25,7 +23,7 @@ def main(item):
 
         ids = ncfile.variables['ids'][:]
         z = ncfile.variables['z'][:]
-        
+
         for n, id in enumerate(ids):
             id = int(id)
             print "time: ", t, " id: ", id
@@ -56,7 +54,7 @@ def main(item):
                     if name not in ('ids', 'z'):
                         savefile.variables[name][l, :] = ncfile.variables[name][n, :]
                 savefile.close()
-                                
+                  
         ncfile.close()
    
 if __name__ == "__main__":

@@ -6,13 +6,12 @@ import numpy
 import cPickle
 from netCDF4 import Dataset
 import sys, os
-import sys
 sys.path.append('/home/vpopa/repos/python')
 from thermo import SAM
-import cgils as mc
+import ent_analysis.lib.model_param as mc
 
 # Load mean cloud field stat
-stat_file = Dataset('%s/ENT_S6_IDEAL_301K_b_stat.nc' % mc.data_dir)
+stat_file = Dataset(mc.get_stat())
 data = {'z': stat_file.variables['z'][:].astype(double),
     'RHO' : stat_file.variables['RHO'][0,:].astype(double),
     'PRES' : stat_file.variables['PRES'][0,:].astype(double)*100.}

@@ -2,15 +2,14 @@
 
 from pylab import *
 import numpy
-#import pcontour
 import cPickle
 import glob
 from netCDF4 import Dataset
 import sys
-
+sys.path.append('/home/vpopa/repos/python')
 from thermo import SAM
 import var_calcs
-import model_param as mc
+import ent_analysis.lib.model_param as mc
 
 #--------------
 

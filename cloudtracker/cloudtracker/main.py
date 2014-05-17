@@ -40,7 +40,7 @@ def load_data(filename):
 
 def main(MC, save_all=True):
     sys.setrecursionlimit(100000)
-    input_dir = MC['input_directory']
+    input_dir = os.path.join(MC['data_directory'], 'tracking')
     nx = MC['nx']
     ny = MC['ny']
     nz = MC['nz']

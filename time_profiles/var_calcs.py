@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 import numpy
+import sys
 
+sys.path.append('/home/vpopa/repos/python')
 from thermo import SAM
-import model_param as mc
+import ent_analysis.lib.model_param as mc
 
 def area(data, k, j, i):
     return float(len(i))*mc.dx*mc.dy

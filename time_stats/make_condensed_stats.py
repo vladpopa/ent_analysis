@@ -11,8 +11,7 @@ import sys
 sys.path.append('/home/vpopa/repos/python')
 from thermo import SAM
 
-import cgils as mc
-dataset = 'cgils'
+import ent_analysis.lib.model_param as mc
 
 def main():
     sample_types = ('CONDENSED', 'EDGE', 'SHELL', 'ENV',)
@@ -23,8 +22,8 @@ def main():
         print l
         cluster_dict = {}          
         nc_files = {}
-        nc_files['CONDENSED'] = Dataset('/tera/vpopa/%s/analysis/time_profiles/cdf/condensed_profile_%08d.nc' % (dataset, l))
-        nc_files['PLUME'] = Dataset('/tera/vpopa/%s/analysis/time_profiles/cdf/plume_profile_%08d.nc' % (dataset, l))    	
+        nc_files['CONDENSED'] = Dataset('../time_profiles/cdf/condensed_profile_%08d.nc' % l)
+        nc_files['PLUME'] = Dataset('../time_profiles/cdf/plume_profile_%08d.nc' % l)    	
         area = nc_files['CONDENSED'].variables['AREA'][:]
         mask = (area > 0.)
         area[~mask] = 0.
@@ -39,13 +38,14 @@ def main():
         mask_top[:, 1:-1] = mask[:, 1:-1] & ~mask[:, 2:] & mask[:, :-2]
         mask_bottom = mask.copy()
         mask_bottom[:, 1:-1] = mask[:, 1:-1] & mask[:, 2:] & ~mask[:, :-2]
-        nc_files['EDGE'] = Dataset('/tera/vpopa/%s/analysis/time_profiles/cdf/condensed_edge_profile_%08d.nc' % (dataset, l))
-        nc_files['SHELL'] = Dataset('/tera/vpopa/%s/analysis/time_profiles/cdf/condensed_shell_profile_%08d.nc' % (dataset, l))
-        nc_files['ENV'] = Dataset('/tera/vpopa/%s/analysis/time_profiles/cdf/condensed_env_profile_%08d.nc' % (dataset, l))
-        entrain_file = Dataset('/tera/vpopa/%s/analysis/time_profiles/cdf/condensed_entrain_profile_%08d.nc' % (dataset, l))
-        surface_file = Dataset('/tera/vpopa/%s/analysis/time_profiles/cdf/surface_profile_%08d.nc' % (dataset, l))
-        chi_file = Dataset('/tera/vpopa/%s/analysis/time_profiles/cdf/condensed_chi_profile_%08d.nc' % (dataset, l))
-        
+        nc_files['EDGE'] = Dataset('../time_profiles/cdf/condensed_edge_profile_%08d.nc' % l)
+        nc_files['SHELL'] = Dataset('../time_profiles/cdf/condensed_shell_profile_%08d.nc' % l)
+        nc_files['ENV'] = Dataset('../time_profiles/cdf/condensed_env_profile_%08d.nc' % l)
+        entrain_file = Dataset('../time_profiles/cdf/condensed_entrain_profile_%08d.nc' % l)
+        surface_file = Dataset('../time_profiles/cdf/surface_profile_%08d.nc' % l)
+        chi_file = Dataset('../time_profiles/cdf/condensed_chi_profile_%08d.nc' % l)
+        stat_file = Dataset(mc.get_stat())
+                
         z = nc_files['CONDENSED'].variables['z'][:]
         z = numpy.resize(z, mask.shape)
         cluster_dict['z'] = z[mask]

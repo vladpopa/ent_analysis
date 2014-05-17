@@ -7,16 +7,16 @@ sys.path.append('/home/vpopa/repos/python')
 from thermo import SAM
 import glob
 
-import cgils as mc
+import ent_analysis.lib.model_param as mc
 
 def makechi(filename):
     key = int(filename.split('/')[-1].split('_')[-1].split('.')[0])
     print "chi_condensed_profile", key
 
-    condensedfile = Dataset('/tera/vpopa/cgils/analysis/time_profiles/cdf/condensed_profile_%08d.nc' % key)
-    envfile = Dataset('/tera/vpopa/cgils/analysis/time_profiles/cdf/condensed_env_profile_%08d.nc' % key)
-    shellfile = Dataset('/tera/vpopa/cgils/analysis/time_profiles/cdf/condensed_shell_profile_%08d.nc' % key)
-    statfile = Dataset('/tera/vpopa/cgils/data/ENT_S6_IDEAL_301K_b_stat.nc')
+    condensedfile = Dataset('cdf/condensed_profile_%08d.nc' % key)
+    envfile = Dataset('cdf/condensed_env_profile_%08d.nc' % key)
+    shellfile = Dataset('cdf/condensed_shell_profile_%08d.nc' % key)
+    statfile = Dataset(mc.get_stat())
  
     t = numpy.atleast_1d(condensedfile.variables['ids'][:])
 
