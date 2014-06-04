@@ -1,7 +1,7 @@
 import numpy, ConfigParser, glob, os, sys
 
 config = ConfigParser.RawConfigParser()
-config.read('../config.cfg')
+config.read('config.cfg')
 model_config = {}
 
 for option in ('ug', 'vg', 'dt', 'dz', 'dy', 'dx'):

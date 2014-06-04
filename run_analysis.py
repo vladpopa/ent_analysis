@@ -8,7 +8,7 @@ from multiprocessing import Pool
 PROC = 16
 
 import ent_analysis.lib.model_param as mc
-from ent_analysis.conversion import convert
+from ent_analysis.conversion import convert, generate_tracking
 import cloudtracker.cloudtracker.main as cloudtracker
 
 # Default working directory for ent_analysis package
@@ -54,11 +54,13 @@ def run_conversion():
     # # Move the netCDF files to relevant locations
     # filelist = glob.glob('./*.nc')
     # wrapper(pkg, 'nc_transfer', 'transfer', filelist)
-    # 
-    # # generate_tracking
-    # filelist = glob.glob('%s/variables/*.nc' % (mc.data_directory))
-    # wrapper(pkg, 'generate_tracking', 'main', filelist)
     
+    # generate_tracking
+    filelist = glob.glob('%s/variables/*.nc' % (mc.data_directory))
+    #wrapper(pkg, 'generate_tracking', 'main', filelist)
+    # for file_name in filelist:
+    #     generate_tracking.main(file_name)
+
 def run_cloudtracker():
     # Change the working directory for cloudtracker
     os.chdir('%s/cloudtracker/' % (cwd))
@@ -69,12 +71,12 @@ def run_cloudtracker():
     
     # Swap input directory for cloudtracker 
     model_config['input_directory'] = mc.data_directory + '/tracking/'
-    #cloudtracker.main(model_config) 
+    cloudtracker.main(model_config) 
 
 def run_profiler():
     # Time Profiles
     pkg = 'time_profiles'
-    os.chdir('%s/time_profiles' % (cwd))    
+    os.chdir('%s/time_profiles' % (cwd))
     
     # Ensure output folder exists
     if not os.path.exists('%s/time_profiles/cdf' % (cwd)):
@@ -116,6 +118,6 @@ if __name__ == '__main__':
     run_conversion()
     run_cloudtracker()
     run_profiler()
-    # run_id_profiles()
+    run_id_profiles()
     
     print 'Entrainment analysis completed'

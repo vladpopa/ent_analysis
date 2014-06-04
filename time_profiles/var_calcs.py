@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 import numpy
-import sys
 
-sys.path.append('/home/vpopa/repos/python')
-from thermo import SAM
+from ent_analysis.lib.thermo import SAM
 import ent_analysis.lib.model_param as mc
 
 def area(data, k, j, i):

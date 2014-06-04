@@ -57,18 +57,18 @@ def main(MC, save_all=True):
     if not os.path.exists('output'):
         os.mkdir('output')
 
-    for n, filename in enumerate(filelist):
-        print "generate cloudlets; time step: %d" % n
-        core, condensed, plume, u, v, w = load_data(filename)
-
-        cloudlets = generate_cloudlets(core, condensed, plume, 
-                                       u, v, w, MC)
-    
-        cPickle.dump(cloudlets, open('pkl/cloudlets_%08g.pkl' % n,'wb'))
-
-#----cluster----
-
-    cluster_cloudlets(MC)
+#     for n, filename in enumerate(filelist):
+#         print "generate cloudlets; time step: %d" % n
+#         core, condensed, plume, u, v, w = load_data(filename)
+# 
+#         cloudlets = generate_cloudlets(core, condensed, plume, 
+#                                        u, v, w, MC)
+#     
+#         cPickle.dump(cloudlets, open('pkl/cloudlets_%08g.pkl' % n,'wb'))
+# 
+# #----cluster----
+# 
+#     cluster_cloudlets(MC)
         
 #----graph----
 
@@ -86,4 +86,3 @@ def main(MC, save_all=True):
     for n in range(nt):
         print "output cloud data, time step: %d" % n
         output_cloud_data(cloud_graphs, cloud_noise, n, MC)
-            

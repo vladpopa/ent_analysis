@@ -21,7 +21,7 @@ from pylab import *
 from netCDF4 import Dataset
 import glob
 sys.path.append('/home/vpopa/repos/python')
-from thermo import SAM
+from ent_analysis.lib.thermo import SAM
 import ent_analysis.lib.model_param as mc
 
 def main(filename):
