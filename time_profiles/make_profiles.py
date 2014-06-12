@@ -127,15 +127,15 @@ def main(filename):
     stat_file.close()
     
     # For each cloud, iterate over all times
-    cloud_filename = '../cloudtracker/pkl/cloud_data_%08d.pkl' % time
-    #cluster_filename = '../cloudtracker/pkl/clusters_%08d.pkl' % time
-    
+    #cloud_filename = '../cloudtracker/pkl/cloud_data_%08d.pkl' % time
+    plume_filename = '../cloudtracker/pkl/plume_data_%08d.pkl' % time
+
     # Load the cloud data at that timestep
-    clouds = cPickle.load(open(cloud_filename, 'rb'))
-    #clusters = cPickle.load(open(cluster_filename, 'rb'))
-       
-    ids = clouds.keys()
-    #ids = clusters.keys()
+    #clouds = cPickle.load(open(cloud_filename, 'rb'))
+    plumes = cPickle.load(open(plume_filename, 'rb'))
+  
+    #ids = clouds.keys()
+    ids = plumes.keys()
     ids.sort()
 
     data['ids'] = numpy.array(ids)
@@ -159,10 +159,10 @@ def main(filename):
     for n, id in enumerate(ids):
         print "time: ", time, " id: ", id
         # Select the current cloud id
-        cloud = clouds[id]
-	#cluster = clusters[id]
-        make_profiles(profiles, cloud, vars, data, n)
-        #make_profiles(profiles, cluster, vars, data, n)
+        #cloud = clouds[id]
+	plume = plumes[id]
+        #make_profiles(profiles, cloud, vars, data, n)
+        make_profiles(profiles, plume, vars, data, n)
         
     for savefile in savefiles.values():
         savefile.close()
