@@ -117,8 +117,8 @@ def run_id_profiles():
 
 if __name__ == '__main__':
 	#run_conversion()
-        #run_cloudtracker()
-	#run_profiler()
+        run_cloudtracker()
+	run_profiler()
 	run_id_profiles()
 	
 	print 'Entrainment analysis completed'
