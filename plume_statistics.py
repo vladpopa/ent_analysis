@@ -34,11 +34,7 @@ def cloud_statistics(file_name):
     file_name : netCDF file name
         id_profile file for a tracked cloud with dimensions double t(t), 
         double z(z).
-      
-    Return
-    ------
-    numpy.array
-        Column array of shaded cloud areas.    
+         
     """
     
     # Read netCDF dataset
@@ -71,13 +67,24 @@ def cloud_statistics(file_name):
     return lifetime, base, top, mass, l_min, l_max
 
 def subcloudplume_statistics(file_name, base):
-
+    """
+    Return sub-cloud plume lifetime for a tracked cloud.
+        
+    Parameters
+    ----------
+    file_name : netCDF file name
+        id_profile file for a tracked cloud with dimensions double t(t), 
+        double z(z).
+    base : cloud base (in m)
+      
+    """
     # Read netCDF dataset
     data = Dataset(file_name)
-
     tracer = ma.masked_invalid(data.variables['TR01'][...])
+    area = ma.masked_invalid(data.variables['AREA'][...])
     time = data.variables['t'][...]
     z = data.variables['z'][...]
+    
     # find grid points above cloud base
     above_cloudbase = z >=  base
     above_cloudbase = np.tile(above_cloudbase, (time.size, 1))
@@ -89,9 +96,15 @@ def subcloudplume_statistics(file_name, base):
 
     # mask is True for points that don't have tracer
     tracer_mask = ma.getmask(tracer)
+    
+    area_mask = ma.getmask(area)
 
     tracer_below_cloudbase = ma.masked_array(tracer, np.logical_or(above_cloudbase, tracer_mask))
     tracer_max = np.max(tracer_below_cloudbase, axis = 1)
+
+    area_below_cloudbase = ma.masked_array(area, np.logical_or(above_cloudbase, area_mask))
+    area_mean = np.mean(area_below_cloudbase, axis = 1)
+    area_mean = np.mean(area_mean)
  
     # if there is no tracer below cloudbase, the subcloud plume has zero lifetime
     if np.all(ma.getmask(tracer_max)):
@@ -116,7 +129,7 @@ def subcloudplume_statistics(file_name, base):
 
     data.close()
 
-    return lifetime, l_min, l_max
+    return lifetime, l_min, l_max, area_mean
     
 if __name__ == '__main__':
       
@@ -146,12 +159,14 @@ if __name__ == '__main__':
     plume_lifetimes = np.array([])
     plume_l_mins = np.array([])
     plume_l_maxs = np.array([])
+    plume_areas = np.array([])
+    
     for n, plume_file_name in enumerate(plume_file_list):
         id = int(plume_file_name[-11:-3])
         cloud_file_name = glob.glob('id_profiles/cdf/condensed_profile_%08d.nc' % id)
         print('Calculating statistics for plume id', id)
         cloud_lifetime, base, top, mass, l_min, l_max = cloud_statistics(cloud_file_name[0]) 
-        plume_lifetime, plume_l_min, plume_l_max = subcloudplume_statistics(plume_file_name, base)
+        plume_lifetime, plume_l_min, plume_l_max, plume_area = subcloudplume_statistics(plume_file_name, base)
         cloud_lifetimes = np.append(cloud_lifetimes, cloud_lifetime)
         bases = np.append(bases, base)
         tops = np.append(tops, top)
@@ -161,9 +176,11 @@ if __name__ == '__main__':
         plume_lifetimes = np.append(plume_lifetimes, plume_lifetime) 
         plume_l_mins = np.append(plume_l_mins, plume_l_min)
         plume_l_maxs = np.append(plume_l_maxs, plume_l_max)
+        plume_areas = np.append(plume_areas, plume_area)
         cloud_ids = np.append(cloud_ids, id)
-        print('cloud duration', cloud_lifetime/mc.dt, 'mass', mass)
+        print('cloud duration', cloud_lifetime/mc.dt)
         print('sub-cloud plume duration', plume_lifetime/mc.dt)
+        print('sub-cloud plume mean area', plume_area)
         
     # Remove cloud noise
     id_stats['cloud_duration'] =  cloud_lifetimes[1:]/mc.dt
@@ -176,15 +193,18 @@ if __name__ == '__main__':
     id_stats['plume_duration'] = plume_lifetimes[1:]/mc.dt
     id_stats['plume_l_min'] = plume_l_mins[1:]/mc.dt
     id_stats['plume_l_max'] = plume_l_maxs[1:]/mc.dt
+    id_stats['plume_meanarea'] = plume_areas[1:]
  
 
          
     # Find id of longest lived cloud
     id_max = id_stats['cloud_id'][np.argmax(id_stats['cloud_duration'])]
     print('max_lifetime:', id_stats['cloud_duration'][id_max], 'id:', id_max)
+    print('mean area of sub-cloud plume  of longest lived cloud', id_stats['plume_meanarea'][id_max])
 
-    print('mean cloud lifetime: ', np.mean(id_stats['cloud_duration']))
-    print('mean subcloud plume lifetime: ', np.mean(id_stats['plume_duration']))
+    print('mean cloud lifetime (sec): ', np.mean(id_stats['cloud_duration'])*mc.dt)
+    print('mean subcloud plume lifetime (sec): ', np.mean(id_stats['plume_duration'])*mc.dt)
+  
 
     
     # Save cloud statistics
