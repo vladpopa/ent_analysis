@@ -74,16 +74,21 @@ def main(MC, save_all=True):
 
     print "make graph"
 
-    cloud_graphs, cloud_noise = make_graph(MC)
+    #cloud_graphs, cloud_noise = make_graph(MC)
+    plume_graphs, plume_noise = make_graph(MC)
     
-    print "\tFound %d clouds" % len(cloud_graphs)
+    #print "\tFound %d clouds" % len(cloud_graphs)
+    print "\tFound %d olumes" % len(plume_graphs)
 
     if save_all:
-        cPickle.dump((cloud_graphs, cloud_noise), open('pkl/graph_data.pkl', 'wb'))
+        #cPickle.dump((cloud_graphs, cloud_noise), open('pkl/graph_data.pkl', 'wb')) 
+        cPickle.dump((plume_graphs, plume_noise), open('pkl/graph_data.pkl', 'wb'))
             
 #----output----
 
     for n in range(nt):
-        print "output cloud data, time step: %d" % n
-        output_cloud_data(cloud_graphs, cloud_noise, n, MC)
+        #print "output cloud data, time step: %d" % n
+        #output_cloud_data(cloud_graphs, cloud_noise, n, MC)
+        print "output plume data, time step: %d" % n
+        output_cloud_data(plume_graphs, plume_noise, n, MC)
             

@@ -124,7 +124,8 @@ def output_cloud_data(cloud_graphs, cloud_noise, t, MC):
         clusters[key] = cluster_dict[id]
 
     # If t
-    clouds = {}
+    #clouds = {}
+    plumes = {}
     id = 0
     for subgraph in cloud_graphs:
         # Grab the nodes at the current time 
@@ -142,12 +143,17 @@ def output_cloud_data(cloud_graphs, cloud_noise, t, MC):
                 condensed.append(clusters[node]['condensed'])
                 plume.append(clusters[node]['plume'])
                 
-            cloud = {'core': numpy.hstack(core),
+            #cloud = {'core': numpy.hstack(core),
+            #         'condensed': numpy.hstack(condensed),
+            #         'plume': numpy.hstack(plume)}
+            
+            plume  = {'core': numpy.hstack(core),
                      'condensed': numpy.hstack(condensed),
                      'plume': numpy.hstack(plume)}
 
             # Calculate core/cloud, env, shell and edge
-            clouds[id] = calculate_data(cloud, MC)
+            #clouds[id] = calculate_data(cloud, MC)
+            plumes[id] = calculate_data(plume, MC)
         id = id + 1
 
     # Add all the noise to a noise cluster
@@ -169,13 +175,17 @@ def output_cloud_data(cloud_graphs, cloud_noise, t, MC):
         noise_clust['plume'] = numpy.hstack(noise_clust['plume'])
 
     # Only save the noise if it contains cloud core
-    clouds[-1] = calculate_data(noise_clust, MC)
+    plumes[-1] = calculate_data(noise_clust, MC)
             
-    print "Number of Clouds at Current Timestep: ", len(clouds.keys())
+    #print "Number of Clouds at Current Timestep: ", len(clouds.keys())
+    print "Number of Plumes at Current Timestep: ", len(plumes.keys())
+    
 
-    cPickle.dump(clouds, open('pkl/cloud_data_%08g.pkl' % t,'wb'))
+    #cPickle.dump(clouds, open('pkl/cloud_data_%08g.pkl' % t,'wb'))
+    cPickle.dump(plumes, open('pkl/plume_data_%08g.pkl' % t,'wb'))
 
-    save_text_file(clouds, t, MC)
+
+    save_text_file(plumes, t, MC)
 
 #   save .mat file for matlab
 #    new_dict = {}

@@ -89,16 +89,17 @@ def make_graph(MC):
                     graph.add_edge('%08g|%08g' % (t-1, item),
                                    '%08g|%08g' % (t, id))
 
-    # Iterate over every cloud in the graph
+    # Iterate over every plume in the graph
     for subgraph in networkx.connected_component_subgraphs(graph):
-        # Find the duration over which the cloud_graph has cloudy points.
+        # Find the duration over which the plume_graph has plume points.
         times = set()
         for node in subgraph:
-            if subgraph.node[node]['condensed'] > 0:
+            #if subgraph.node[node]['condensed'] > 0:
+             if subgraph.node[node]['plume'] > 0:
                 times.add(int(node[:8]))
 
-        # If cloud exists for less than 5 minutes, check if it has split events
-        # If it has split events, remove them and reconnect the cloud
+        # If plume  exists for less than 5 minutes, check if it has split events
+        # If it has split events, remove them and reconnect the plume
         if len(times) < 5:
             for node in subgraph:
                 if subgraph.node[node]['split']:
@@ -107,13 +108,13 @@ def make_graph(MC):
                     graph.add_edge(node, '%08g|%08g' % (t, item))
 
     for subgraph in networkx.connected_component_subgraphs(graph):
-        # Find the duration over which the cloud_graph has cloudy points.
+        # Find the duration over which the graph has plume points.
         times = set()
         for node in subgraph:
-            if subgraph.node[node]['condensed'] > 0:
+            if subgraph.node[node]['plume'] > 0:
                 times.add(int(node[:8]))
 
-        # If a cloud exists less than 5 minutes, check for merge events
+        # If a plume exists less than 5 minutes, check for merge events
         if len(times) < 5:
             for node in subgraph:
                 if subgraph.node[node]['merge']:
@@ -122,23 +123,32 @@ def make_graph(MC):
                     graph.add_edge(node, '%08g|%08g' % (t-1, item))
 
 
-    cloud_times = []
-    
-    cloud_graphs = []
-    cloud_noise = []
+    #cloud_times = []
+    plume_times = []
+    #cloud_graphs = []
+    plume_graphs = []
+    #cloud_noise = []
+    plume_noise = []
+
     for subgraph in networkx.connected_component_subgraphs(graph):
         # If a cloud exists less than 2 minutes, classify it as noise
         # Otherwise, put it in cloud_graphs
-        condensed_time = set()
+        #condensed_time = set()
+        plume_time = set()
         core_time = set()
-        condensed_volume = 0
+        #condensed_volume = 0
+        plume_volume = 0
         core_volume = 0
         for node in subgraph.nodes():
-            condensed_vol = subgraph.node[node]['condensed'] 
-            if condensed_vol > 0:
-                condensed_volume = condensed_volume + condensed_vol
+            #condensed_vol = subgraph.node[node]['condensed']
+            plume_vol = subgraph.node[node]['plume'] 
+            #if condensed_vol > 0:
+            if plume_vol > 0:
+                #condensed_volume = condensed_volume + condensed_vol
+                plume_volume = plume_volume + plume_vol
                 time = int(node[:8])
-                condensed_time.add(time)
+                #condensed_time.add(time)
+                plume_time.add(time)
 
             core_vol = subgraph.node[node]['core'] 
             if core_vol > 0:
@@ -146,20 +156,30 @@ def make_graph(MC):
                 time = int(node[:8])
                 core_time.add(time)
 
-        if (len(condensed_time) < 2) or (len(core_time) == 0):
-            cloud_noise.append(subgraph)
+        #if (len(condensed_time) < 2) or (len(core_time) == 0):
+        if (len(plume_time) < 2) or (len(core_time) == 0):
+            #cloud_noise.append(subgraph)
+            plume_noise.append(subgraph)
         else:
-            cloud_graphs.append((condensed_volume, subgraph))
+            #cloud_graphs.append((condensed_volume, subgraph)) 
+            plume_graphs.append((plume_volume, subgraph))
             times = list(times)
             times.sort()
-            cloud_times.append(tuple(times))
+            #cloud_times.append(tuple(times))
+            plume_times.append(tuple(times))
 
-    cloud_graphs.sort()
-    cloud_graphs.reverse()
-    cloud_graphs = [item[1] for item in cloud_graphs]
+
+    #cloud_graphs.sort()
+    #cloud_graphs.reverse()
+    #cloud_graphs = [item[1] for item in cloud_graphs]
+    plume_graphs.sort()
+    plume_graphs.reverse()
+    plume_graphs = [item[1] for item in plume_graphs]
     
-    if full_output: full_output(cloud_times, cloud_graphs, merges, splits, MC)
-
-    return cloud_graphs, cloud_noise
+    #if full_output: full_output(cloud_times, cloud_graphs, merges, splits, MC)
+    if full_output: full_output(plume_times, plume_graphs, merges, splits, MC)
+    
+    #return cloud_graphs, cloud_noise
+    return plume_graphs, plume_noise
 
 
