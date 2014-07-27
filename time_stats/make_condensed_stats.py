@@ -9,8 +9,8 @@ except:
     import pickle
 import numpy.ma
 from ent_analysis.lib.thermo import SAM
-#import ent_analysis.lib.model_param as mc
-import model_config.cgils_ctl_s6_25m as mc
+from ent_analysis.lib.thermo import thermo
+import ent_analysis.lib.model_param as mc
 
 def main():
     sample_types = ('CONDENSED', 'EDGE', 'SHELL', 'ENV',)
@@ -42,9 +42,10 @@ def main():
         nc_files['ENV'] = Dataset('../time_profiles/cdf/condensed_env_profile_%08d.nc' % l)
         entrain_file = Dataset('../time_profiles/cdf/condensed_entrain_profile_%08d.nc' % l)
         surface_file = Dataset('../time_profiles/cdf/surface_profile_%08d.nc' % l)
+        condensed_shell_file = Dataset('../time_profiles/cdf/condensed_shell_profile_%08d.nc' % l)
         chi_file = Dataset('../time_profiles/cdf/condensed_chi_profile_%08d.nc' % l)
         stat_file = Dataset(mc.get_stat())
-                
+       
         z = nc_files['CONDENSED'].variables['z'][:]
         z = np.resize(z, mask.shape)
         cluster_dict['z'] = z[mask]
@@ -52,9 +53,16 @@ def main():
         # Calculate and store cloud thickness for each sample
         # Use maked arrays to preserve axes; if z_min == z_max, thickness = dz
         masked_z = np.ma.masked_where(area==0., z)
-        thickness = np.ones_like(z)*(masked_z.max(axis=1) - 
+        depth = np.ones_like(z)*(masked_z.max(axis=1) - 
             masked_z.min(axis=1))[:, np.newaxis] + mc.dz
-        cluster_dict['thickness'] = thickness[mask]
+        cluster_dict['depth'] = depth[mask]
+
+        # Calculate and store condensed shell relative humidity
+        r = condensed_shell_file.variables['QV'][:]
+        p = condensed_shell_file.variables['PRES'][:]
+        T = condensed_shell_file.variables['TABS'][:]
+        relh = thermo.e(r, p)/thermo.e_star(T)
+        cluster_dict['RELH_ENV_SHELL'] = relh[mask]
 
         z = z*mask      
         zmax = np.ones_like(mask)*(z.max(1))[:, np.newaxis]        
