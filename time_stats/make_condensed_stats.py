@@ -1,17 +1,16 @@
 #!/usr/bin/env python
-
 from pylab import *
-import numpy
+import numpy as np
 import glob
 from netCDF4 import Dataset
-import os.path
-import cPickle
+try:
+    import cPickle as pickle
+except:
+    import pickle
 import numpy.ma
-import sys
-sys.path.append('/home/vpopa/repos/python')
-from thermo import SAM
-
-import ent_analysis.lib.model_param as mc
+from ent_analysis.lib.thermo import SAM
+#import ent_analysis.lib.model_param as mc
+import model_config.cgils_ctl_s6_25m as mc
 
 def main():
     sample_types = ('CONDENSED', 'EDGE', 'SHELL', 'ENV',)
@@ -47,13 +46,20 @@ def main():
         stat_file = Dataset(mc.get_stat())
                 
         z = nc_files['CONDENSED'].variables['z'][:]
-        z = numpy.resize(z, mask.shape)
+        z = np.resize(z, mask.shape)
         cluster_dict['z'] = z[mask]
 
+        # Calculate and store cloud thickness for each sample
+        # Use maked arrays to preserve axes; if z_min == z_max, thickness = dz
+        masked_z = np.ma.masked_where(area==0., z)
+        thickness = np.ones_like(z)*(masked_z.max(axis=1) - 
+            masked_z.min(axis=1))[:, np.newaxis] + mc.dz
+        cluster_dict['thickness'] = thickness[mask]
+
         z = z*mask      
-        zmax = numpy.ones_like(mask)*(z.max(1))[:, numpy.newaxis]        
+        zmax = np.ones_like(mask)*(z.max(1))[:, np.newaxis]        
         z[~mask] = 1e8
-        zmin = numpy.ones_like(mask)*(z.min(1))[:, numpy.newaxis]
+        zmin = np.ones_like(mask)*(z.min(1))[:, np.newaxis]
         cluster_dict['z_scaled'] = ((z - zmin.min())/(zmax-zmin.min()))[mask]
 
         rho = nc_files['CONDENSED'].variables['RHO'][:]
@@ -87,11 +93,11 @@ def main():
             cluster_dict[var + '_CONDENSED'] = temp[mask]
             
         chi = chi_file.variables['chi'][:]
-#        chi_shell = chi_file.variables['chi_shell'][:]
-#        chi_se = chi_file.variables['chi_se'][:]
+        # chi_shell = chi_file.variables['chi_shell'][:]
+        # chi_se = chi_file.variables['chi_se'][:]
 
         cluster_dict['CHI'] = chi[mask]
-#        cluster_dict['CHI_SHELL'] = chi_shell[mask]
+        # cluster_dict['CHI_SHELL'] = chi_shell[mask]
 
         surface = surface_file.variables['CONDENSED_SURFACE'][:]
         cluster_dict['SURFACE'] = surface[mask]
@@ -142,10 +148,10 @@ def main():
         chi_file.close()
         
     for item in stats_dict:
-        stats_dict[item] = numpy.hstack(stats_dict[item])
+        stats_dict[item] = np.hstack(stats_dict[item])
 
-    cPickle.dump(stats_dict, open('pkl/condensed_stats.pkl', 'wb'))
-    
+    pickle.dump(stats_dict, open('pkl/condensed_time_stats.pkl', 'wb'))
+        
 if __name__ == "__main__":
     main()
 

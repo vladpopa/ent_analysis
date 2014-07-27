@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-
 from pylab import *
-import numpy
+import numpy as np
 import glob
 from netCDF4 import Dataset
-import cPickle
+try:
+    import cPickle as pickle
+except:
+    import pickle
 import numpy.ma
-import sys
-sys.path.append('/home/vpopa/repos/python')
-from thermo import SAM
-
-import ent_analysis.lib.model_param as mc
+from ent_analysis.lib.thermo import SAM
+#import ent_analysis.lib.model_param as mc
+import model_config.cgils_ctl_s6_25m as mc
 
 def main():
     sample_types = ('CORE', 'ENV', 'PLUME')
@@ -20,8 +20,7 @@ def main():
     for l in range(mc.nt):
         print l
         cluster_dict = {}
-
-            
+        
         nc_files = {}
         nc_files['CORE'] = Dataset('../time_profiles/cdf/core_profile_%08d.nc' % l)
         nc_files['PLUME'] = Dataset('../time_profiles/cdf/plume_profile_%08d.nc' % l)	
@@ -40,26 +39,35 @@ def main():
         nc_files['ENV'] = Dataset('../time_profiles/cdf/core_env_profile_%08d.nc' % l)
         entrain_file = Dataset('../time_profiles/cdf/core_entrain_profile_%08d.nc' % l)
         surface_file = Dataset('../time_profiles/cdf/surface_profile_%08d.nc' % l)
+        condensed_shell_file = Dataset('../time_profiles/cdf/condensed_shell_profile_%08d.nc' % l)
         chi_file = Dataset('../time_profiles/cdf/core_chi_profile_%08d.nc' % l)
-        stat_file = Dataset(mc.get_stat())
+        #stat_file = Dataset(mc.get_stat())
+        stat_file = Dataset('/newtera/tera/vpopa/cgils_ctl_s6_25m/data/ENT_CGILS_CTL_S6_3D_384x384x194_25m_1s_stat.nc')
 
         z = nc_files['CORE'].variables['z'][:]
-        z = numpy.resize(z, mask.shape)
+        z = np.resize(z, mask.shape)
         cluster_dict['z'] = z[mask]
+        
+        # Calculate and store cloud thickness for each sample
+        # Use maked arrays to preserve axes; if z_min == z_max, thickness = dz
+        masked_z = np.ma.masked_where(area==0., z)
+        thickness = np.ones_like(z)*(masked_z.max(axis=1) - 
+            masked_z.min(axis=1))[:, np.newaxis] + mc.dz
+        cluster_dict['thickness'] = thickness[mask]
 
         stat_core = stat_file.variables['COR'][l, :]
         if (stat_core > 0.).any():
-            k_cb = numpy.nonzero(stat_core > 0.)[0].min()
+            k_cb = np.nonzero(stat_core > 0.)[0].min()
         else:
-            k_cb = numpy.nonzero(area)[1].min()
+            k_cb = np.nonzero(area)[1].min()
             
         z_cb = ones_like(z)*z[0, k_cb]
         cluster_dict['z_cb'] = z_cb[mask]
         
         z = z*mask
-        zmax = numpy.ones_like(mask)*(z.max(1))[:, numpy.newaxis]        
+        zmax = np.ones_like(mask)*(z.max(1))[:, np.newaxis]        
         z[~mask] = 1e10
-        zmin = numpy.ones_like(mask)*(z.min(1))[:, numpy.newaxis]
+        zmin = np.ones_like(mask)*(z.min(1))[:, np.newaxis]
         cluster_dict['z_scaled'] = ((z - zmin.min())/(zmax-zmin.min()))[mask]
 
         rho = nc_files['CORE'].variables['RHO'][:]
@@ -81,14 +89,14 @@ def main():
                     cluster_dict[var + '_' + type + '-MEAN'] = temp2[mask]
                                 
             cluster_dict[var + '_CORE-ENV'] = cluster_dict[var + '_CORE'] - cluster_dict[var + '_ENV']
-            #cluster_dict[var + '_CORE-SHELL'] = cluster_dict[var + '_CORE'] - cluster_dict[var + '_SHELL']
+            # cluster_dict[var + '_CORE-SHELL'] = cluster_dict[var + '_CORE'] - cluster_dict[var + '_SHELL']
 
         qsat = SAM.qsatw(nc_files['CORE'].variables['TABS'][:], 
                          nc_files['CORE'].variables['PRES'][:])
         cluster_dict['QSAT_CORE'] = qsat[mask]
 
         qsat_cb = qsat[:, k_cb]
-        qsat_cb = ones_like(qsat)*qsat_cb[:, numpy.newaxis]
+        qsat_cb = ones_like(qsat)*qsat_cb[:, np.newaxis]
         cluster_dict['QSAT_CB'] = qsat_cb[mask]
 
         tv = stat_file.variables['THETAV'][l, :]
@@ -215,7 +223,7 @@ def main():
 
         cluster_dict['TIME'] = ones_like(z[mask])*l*mc.dt
         ids = nc_files['CORE'].variables['ids'][:]
-        cluster_dict['ID'] = (ones_like(z)*ids[:, numpy.newaxis])[mask]
+        cluster_dict['ID'] = (ones_like(z)*ids[:, np.newaxis])[mask]
         
         for item in cluster_dict:
             if item in stats_dict:
@@ -229,10 +237,10 @@ def main():
         chi_file.close()
         
     for item in stats_dict:
-        stats_dict[item] = numpy.hstack(stats_dict[item])
+        stats_dict[item] = np.hstack(stats_dict[item])
 
-    cPickle.dump(stats_dict, open('pkl/core_stats.pkl', 'wb'))
-    
+    pickle.dump(stats_dict, open('pkl/core_time_stats.pkl', 'wb'))
+        
 if __name__ == "__main__":
     main()
 

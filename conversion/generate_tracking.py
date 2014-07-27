@@ -69,6 +69,8 @@ def main(filename):
     y = nc_file.variables['y'][:].astype(double)
     z = nc_file.variables['z'][:].astype(double)
 
+    nc_file.close()
+
     tr_mean = tr_field.reshape((len(z), len(y)*len(x))).mean(1)
     tr_stdev = numpy.sqrt(tr_field.reshape((len(z), len(y)*len(x))).var(1))
     tr_min = .05*numpy.cumsum(tr_stdev)/(numpy.arange(len(tr_stdev))+1)
