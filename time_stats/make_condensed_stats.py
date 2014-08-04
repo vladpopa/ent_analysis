@@ -62,7 +62,7 @@ def main():
         p = condensed_shell_file.variables['PRES'][:]
         T = condensed_shell_file.variables['TABS'][:]
         relh = thermo.e(r, p)/thermo.e_star(T)
-        cluster_dict['RELH_ENV_SHELL'] = relh[mask]
+        cluster_dict['RELH_COND_SHELL'] = relh[mask]
 
         z = z*mask      
         zmax = np.ones_like(mask)*(z.max(1))[:, np.newaxis]        

@@ -59,7 +59,7 @@ def main():
         p = condensed_shell_file.variables['PRES'][:]
         T = condensed_shell_file.variables['TABS'][:]
         relh = thermo.e(r, p)/thermo.e_star(T)
-        cluster_dict['RELH_ENV_SHELL'] = relh[mask]
+        cluster_dict['RELH_COND_SHELL'] = relh[mask]
 
         stat_core = stat_file.variables['COR'][l, :]
         if (stat_core > 0.).any():
