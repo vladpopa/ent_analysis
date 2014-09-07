@@ -106,13 +106,13 @@ class Cloudlet:
         return self.masks['condensed']
 
     def condensed_halo(self):
-        return find_halo( self.condensed_mask(), self.MC )
+        return find_halo(self.condensed_mask(), self.MC)
 
     def plume_mask(self):
         return self.masks['plume']
 
     def plume_halo(self):
-        return find_halo( self.plume_mask(), self.MC )
+        return find_halo(self.plume_mask(), self.MC)
 
 #----------------------------
 
@@ -136,13 +136,13 @@ class Cluster:
 
     def add_cloudlets(self, cloudlets):
         for cloudlet in cloudlets:
-            self.add_cloudlet( cloudlet )
+            self.add_cloudlet(cloudlet)
 
     def remove_cloudlets(self, cloudlets):
         for cloudlet in cloudlets:
             if cloudlet.cluster:
                 cloudlet.cluster = None
-                self.cloudlets.remove( cloudlet )
+                self.cloudlets.remove(cloudlet)
             else:
                 raise "Cloudlet does not belong to cluster!"
 
@@ -168,7 +168,6 @@ class Cluster:
             clist.append(cloudlet.masks['condensed'])
         return numpy.hstack(clist)
 
-
     def plume_mask(self):
         clist = []
         for cloudlet in self.cloudlets:
@@ -176,10 +175,10 @@ class Cluster:
         return numpy.hstack(clist)
 
     def condensed_halo(self):
-        return find_halo( self.condensed_mask(), self.MC )
+        return find_halo(self.condensed_mask(), self.MC)
 
     def plume_halo(self):
-        return find_halo( self.plume_mask(), self.MC )
+        return find_halo(self.plume_mask(), self.MC)
 
     def adjacent_cloudlets(self, key):
         result = {}
@@ -198,7 +197,9 @@ class Cluster:
         return result
 
     def connected_cloudlet_groups(self):
-        # only split if both components are connected to ground
+    """ Split cluster if both components are connected to ground.
+    """
+        # Generate lists of condensed and plume cloudlets
         plume_cloudlets = []
         condensed_cloudlets = []
         for cloudlet in self.cloudlets:
@@ -207,6 +208,7 @@ class Cluster:
             else:
                 plume_cloudlets.append(cloudlet)
 
+        # Split into groups of connected condensed cloudlets
         groups = []
         while condensed_cloudlets:
             cloudlet = condensed_cloudlets.pop()
@@ -216,24 +218,30 @@ class Cluster:
                 if cloudlet in condensed_cloudlets:
                     group.append(cloudlet)
                     condensed_cloudlets.remove(cloudlet)
+                    # Add ajdacent cloudlet connections recursively
                     conns.extend(cloudlet.adjacent['condensed'][:])
             groups.append(group)
         
+        # Split cluster if there is more than one group
         if len(groups) > 1:
             detached_groups = []
             attached_groups = []
+            
+            # Identify groups that are attached/detached to ground via plume mask
             for group in groups:
                 mask = []
                 for cloudlet in group:
                     mask.append(cloudlet.plume_mask())
                 mask = numpy.hstack(mask)
-                    
+                  
+                # Check if connected to the ground  
                 if (mask < self.MC['nx']*self.MC['ny']).any():
                     attached_groups.append(group)
                 else:
                     detached_groups.append(group)
 
             if attached_groups:
+                # Group volume for each attached group 
                 volumes = []
                 volume = 0
                 for group in attached_groups:
@@ -263,7 +271,6 @@ class Cluster:
             else:
                 groups = detached_groups
 
-
         while plume_cloudlets:
             cloudlet = plume_cloudlets.pop()
             group = [cloudlet, ]
@@ -276,5 +283,3 @@ class Cluster:
             groups.append(group)
 
         return groups
-
-

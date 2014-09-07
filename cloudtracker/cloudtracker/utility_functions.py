@@ -17,10 +17,19 @@ def zyx_to_index(z, y, x, MC):
 #---------------------------------
 
 def expand_indexes(indexes, MC):
-    # Expand a given set of indexes to include the nearest
-    # neighbour points in all directions.
-    # indexes is an array of grid indexes
+    """Expand a given set of indices to include the nearest neighbour points 
+    in all directions.
     
+    Keyword arguments:
+    
+    indexes --- array of grid indices
+    MC -- model configuration dictionary
+    
+    Return:
+    
+    expanded array of unique grid indices
+    """
+
     nz, ny, nx = MC['nz'], MC['ny'], MC['nx']
                     
     K_J_I = index_to_zyx( indexes, MC )
@@ -33,13 +42,13 @@ def expand_indexes(indexes, MC):
     
     expanded_index = numpy.hstack(stack_list)
 
-    # re-entrant domain
+    # Re-entrant domain
     expanded_index[0, expanded_index[0, :] == nz] = nz-1
     expanded_index[0, expanded_index[0, :] < 0] = 0
     expanded_index[1, :] = expanded_index[1, :]%ny
     expanded_index[2, :] = expanded_index[2, :]%nx
 
-    # convert back to indexes
+    # Convert back to indexes
     expanded_index = zyx_to_index(expanded_index[0, :],
                                   expanded_index[1, :],
                                   expanded_index[2, :],
@@ -52,13 +61,13 @@ def expand_indexes(indexes, MC):
 #---------------------------
 
 def find_halo(indexes, MC):
-    # Expand the set of core points to include the nearest 
-    # neighbour points in all directions.
+    """Find the set of unique grid points immediately outside a given core."""
+    
+    # Expand the set of core points to include unique nearest neighbour points 
+    # in all directions
     new_indexes = expand_indexes(indexes, MC)
 
-    # From the expanded mask, select the points outside the core
-    # expand_index_list returns only unique values,
-    # so we don't have to check for duplicates.
+    # From the expanded mask, select the points outside the given core
     halo = numpy.setdiff1d(new_indexes, indexes, assume_unique=True)
 
     return halo
@@ -66,7 +75,18 @@ def find_halo(indexes, MC):
 #---------------------------
 
 def calc_distance(point1, point2, MC):
-    # Calculate distances corrected for reentrant domain
+    """Calculate grid distances corrected for re-entrant domain.
+    
+    Keyword arguments:
+    
+    point1 --- list of [z, y, x] for initial points
+    point2 --- list of [z, y, x] for final points
+    
+    Return:
+    
+    list of grid distances corrected for re-entrant domain
+    
+    """
     ny, nx = MC['ny'], MC['nx']
         
     delta_x = numpy.abs(point2[2, :] - point1[2, :])
@@ -102,7 +122,6 @@ def calc_radii(data, reference, MC):
         m = k_data.shape[1]
         n = k_ref.shape[1]
         
-       
         k_data = k_data[:, :, numpy.newaxis] * numpy.ones((3, m, n))
         k_ref = k_ref[:, numpy.newaxis, :] * numpy.ones((3, m, n))
         

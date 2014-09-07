@@ -44,9 +44,6 @@ def full_output(cloud_times, cloud_graphs, merges, splits, MC):
 
     cPickle.dump(clouds, open('pkl/graph_events.pkl', 'wb'))
 
-    
-
-
 #---------------------
 
 def make_graph(MC):
@@ -121,9 +118,7 @@ def make_graph(MC):
                     t = int(node[:8])
                     graph.add_edge(node, '%08g|%08g' % (t-1, item))
 
-
-    cloud_times = []
-    
+    cloud_times = []    
     cloud_graphs = []
     cloud_noise = []
     for subgraph in networkx.connected_component_subgraphs(graph):
@@ -146,6 +141,8 @@ def make_graph(MC):
                 time = int(node[:8])
                 core_time.add(time)
 
+        # Clouds with no core are noise??
+        # DISCUSSION ITEM
         if (len(condensed_time) < 2) or (len(core_time) == 0):
             cloud_noise.append(subgraph)
         else:
@@ -161,5 +158,3 @@ def make_graph(MC):
     if full_output: full_output(cloud_times, cloud_graphs, merges, splits, MC)
 
     return cloud_graphs, cloud_noise
-
-

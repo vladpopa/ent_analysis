@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+"""Cloud tracker tasks: load data, generate/cluster cloudlets, graph, output."""
 import numpy
 import glob
 import cPickle
@@ -23,6 +23,7 @@ except:
 #-------------------
 
 def load_data(filename):
+    """Load/return conditionally sampled fields and velocities at each time step."""
     input_file = Dataset(filename)
         
     core = input_file.variables['core'][:].astype(bool)
@@ -39,6 +40,7 @@ def load_data(filename):
 #---------------
 
 def main(MC, save_all=True):
+    """Cloud tracker tasks: load data, generate/cluster cloudlets, graph, output."""
     sys.setrecursionlimit(100000)
     input_dir = os.path.join(MC['data_directory'], 'tracking')
     nx = MC['nx']
@@ -57,23 +59,26 @@ def main(MC, save_all=True):
     if not os.path.exists('output'):
         os.mkdir('output')
 
-#     for n, filename in enumerate(filelist):
-#         print "generate cloudlets; time step: %d" % n
-#         core, condensed, plume, u, v, w = load_data(filename)
-# 
-#         cloudlets = generate_cloudlets(core, condensed, plume, 
-#                                        u, v, w, MC)
-#     
-#         cPickle.dump(cloudlets, open('pkl/cloudlets_%08g.pkl' % n,'wb'))
-# 
-# #----cluster----
-# 
-#     cluster_cloudlets(MC)
+    # Generate cloudlets at every time step
+    for n, filename in enumerate(filelist):
+        print "generate cloudlets; time step: %d" % n
+        core, condensed, plume, u, v, w = load_data(filename)
+
+        cloudlets = generate_cloudlets(core, condensed, plume,
+                                       u, v, w, MC)
+
+        # Save cloudlets at every time step
+        cPickle.dump(cloudlets, open('pkl/cloudlets_%08g.pkl' % n,'wb'))
+
+#----cluster----
+
+    cluster_cloudlets(MC)
         
 #----graph----
 
     print "make graph"
 
+    # One graph per cloud
     cloud_graphs, cloud_noise = make_graph(MC)
     
     print "\tFound %d clouds" % len(cloud_graphs)
@@ -83,6 +88,7 @@ def main(MC, save_all=True):
             
 #----output----
 
+    # Output cloud data at each time step
     for n in range(nt):
         print "output cloud data, time step: %d" % n
         output_cloud_data(cloud_graphs, cloud_noise, n, MC)
