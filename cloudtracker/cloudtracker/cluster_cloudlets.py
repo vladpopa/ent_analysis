@@ -12,8 +12,9 @@ saveit = True
 #--------------------------
 
 def make_spatial_cloudlet_connections(cloudlets, MC):
-    """Find all the cloudlets which have adjacent condensed or plume regions;
-    Store the information in the cloudlet.adjacent dictionary of Cloudlet object.
+    """Find adjacent condensed or plume regions for list of cloudlets.
+    Store the information in the cloudlet.adjacent dictionary of Cloudlet 
+    object.
     
     Method: construct a 3D array of the cloudlet numbers of each condensed and 
     plume point; extract the edge points from these 3D array to determine if the
@@ -23,25 +24,29 @@ def make_spatial_cloudlet_connections(cloudlets, MC):
     condensed_array = -1*numpy.ones((MC['nz']*MC['ny']*MC['nx'],), numpy.int)
     plume_array = -1*numpy.ones((MC['nz']*MC['ny']*MC['nx'],), numpy.int)
 
-    # Label the cloud core and plume points using the list index of the cloudlet
+    # Label the condensed and plume points using the index of the cloudlet
     for cloudlet in cloudlets:
         condensed_array[cloudlet.condensed_mask()] = cloudlet.id
         plume_array[cloudlet.plume_mask()] = cloudlet.id
 
+    # DISCUSSION ITEM: we're not keeping track of CORE--CORE neighbours
+    # PLUME: keep track of CORE--CORE neighbours?
     for cloudlet in cloudlets:
-        # Find all cloudlets that have adjacent condensed regions
+        # Find adjacent condensed regions for each cloudlet's condensed region
         adjacent_condensed = condensed_array[cloudlet.condensed_halo()]
         adjacent_condensed = adjacent_condensed[adjacent_condensed > -1]
         if len(adjacent_condensed) > 0:
-            # Volume is number of points for per ID
+            # Volume is number of points for per id
             volumes = numpy.bincount(adjacent_condensed)
             adjacent_condensed = numpy.unique(adjacent_condensed)
+            # Record reference to Cloudlet objects with adjacent condensed area
+            # and adjacent volume
             for id in adjacent_condensed:
                 cloudlet.adjacent['condensed'].append((volumes[id], cloudlets[id]))
             cloudlet.adjacent['condensed'].sort()
             cloudlet.adjacent['condensed'].reverse()
 
-        # Find all cloudlets that have adjacent plume regions
+        # Find adjacent plume regions for each cloudlet's plume region
         adjacent_plumes = plume_array[cloudlet.plume_halo()]
         adjacent_plumes = adjacent_plumes[adjacent_plumes > -1]
         if len(adjacent_plumes) > 0:
@@ -132,7 +137,7 @@ def make_temporal_connections(cloudlets, old_clusters, MC):
         if len(overlapping_plumes) > 0:
             count_overlaps('plume->plume', overlapping_plumes, cloudlet)
               
-        # First item in cloudlet.overlap has the largest overlap  
+        # First item in cloudlet.overlap has the largest overlap for each key
         for item in cloudlet.overlap:
             cloudlet.overlap[item].sort()
             cloudlet.overlap[item].reverse()
@@ -141,6 +146,9 @@ def make_temporal_connections(cloudlets, old_clusters, MC):
 
 def create_new_clusters(cloudlets, clusters, max_id, MC):
 
+    # Keep lists of cloudlets that have a core region, cloudlets that have no 
+    # core region but have a condesed region and cloudlets that only have a 
+    # plume region
     core_list = []
     condensed_list = []
     plume_list = []
@@ -151,18 +159,18 @@ def create_new_clusters(cloudlets, clusters, max_id, MC):
             condensed_list.append(cloudlet)
         else:
             plume_list.append(cloudlet)
-    
+
     n = 0
 
     # Make clusters out of the cloudlets with core points
     while core_list:
         cloudlet = core_list.pop()
         cluster = Cluster(max_id, [cloudlet], MC)
-        # "New core" event
+        # "New core cluster" event
         cluster.events.append('NCOR')
-        # Add cloudlets with adjacent clouds to the cluster. Adding cloudlets 
-        # may bring more cloudlets into condensed contact with the cluster; 
-        # loop until acondenseds is empty.
+        # Add cloudlets with adjacent condensed region to the cluster condensed
+        # region. Adding cloudlets may bring more cloudlets into condensed 
+        # contact with the cluster; loop until acondenseds is empty.
         acondenseds = cluster.adjacent_cloudlets('condensed')
         while acondenseds:
             n = n + len(acondenseds)
@@ -170,7 +178,7 @@ def create_new_clusters(cloudlets, clusters, max_id, MC):
                 try:
                     core_list.remove(cloudlet)
                 except:
-                    cloud_list.remove(cloudlet)
+                    condensed_list.remove(cloudlet)
             cluster.add_cloudlets(acondenseds)
             acondenseds = cluster.adjacent_cloudlets('condensed')
 
@@ -179,30 +187,36 @@ def create_new_clusters(cloudlets, clusters, max_id, MC):
         # DISCUSSION ITEM
         # new clouds are never explanded into plume region; this doesn't matter
         # for time step 1, but how about later?
+        # PLUME: add code to expand into plume cloudlets here
                 
-    # Make clusters out of the cloudlets without core points
+    # Make clusters out of the cloudlets without core points, but which have 
+    # condensed points
     while condensed_list:
         cloudlet = condensed_list.pop()
         cluster = Cluster(max_id, [cloudlet], MC)
-        # "New cloud" (condensed) event
+        # "New cloud cluster" (meaning "condensed") event
         cluster.events.append('NCLD')
+        # Condensed only cloudlets are contiguous; shouldn't have neighbours
         if (len(cluster.adjacent_cloudlets('condensed')) > 0): 
             print "condensed connection ERROR"
         
         # DISCUSSION ITEM
         # missing code?
         # clusters[max_id] = cluster
-        # max_id = max_id + 1
-        
+        # max_id = max_id + 1        
         # DISCUSSION ITEM
         # initial clouds are never explanded into plume region
-                
+        # PLUME: add code to expand into plume cloudlets here
+                        
     # Make clusters out of the cloudlets without core or condensed points
     while plume_list:
         cloudlet = plume_list.pop()
         cluster = Cluster(max_id, [cloudlet], MC)
-        # "New plume" event
+        # "New plume cluster" event
         cluster.events.append('NP')
+        # Plume only cloudlets are contiguous; shouldn't have neighbours
+        # if (len(cluster.adjacent_cloudlets('plume')) > 0):
+        #     print "plume connection ERROR"
         clusters[max_id] = cluster
         max_id = max_id + 1
 
@@ -251,8 +265,6 @@ def associate_cloudlets_with_previous_clusters(cloudlets, old_clusters, MC):
                 clusters[max_conn].events.append('O%d' % max_conn)
                 clusters[max_conn].past_connections.add(max_conn)
 
-            # DISCUSSION ITEM                
-            # what does this do??
             for conn in back_conns:
                 clusters[max_conn].merge_connections.add(conn)
                 clusters[max_conn].events.append('M%d' % conn)
@@ -268,6 +280,7 @@ def check_for_adjacent_cloudlets(new_cloudlets, clusters):
     overlap previous clusters are connected to the current clusters.
     """
     n = 0
+    # Adjacent condensed regions are considered merged
     for cluster in clusters.values():
         condensed_connections = cluster.adjacent_cloudlets('condensed')
         while condensed_connections:
@@ -298,7 +311,7 @@ def split_clusters(clusters, max_id, MC):
             for size, group in sizes[:-1]:
                 cluster.remove_cloudlets(group)
                 new_cluster = Cluster(max_id, group, MC)
-                # "Split" event; record parent ID
+                # "Split" event; record parent id
                 new_cluster.events.append('S%d' % cluster.id)
                 new_cluster.split_connections.add(cluster.id)
                 clusters[max_id] = new_cluster
@@ -313,7 +326,8 @@ def make_clusters(cloudlets, old_clusters, MC):
     """ 
     max_id = max(old_clusters.keys()) + 1
 
-    # Find the horizontal connections between cloudlets
+    # Find the spatially neighbouring cloudlets for each cloudlet; separate into
+    # condensed and plume
     make_spatial_cloudlet_connections(cloudlets, MC)
 
     # Associate cloudlets with previous timestep clusters; cloudlets that can't 
@@ -336,13 +350,15 @@ def make_clusters(cloudlets, old_clusters, MC):
 #---------------------
 
 def load_cloudlets(t, MC):
+    """Load cloudlets at time t.
+    """
     cloudlets = cPickle.load(open('pkl/cloudlets_%08g.pkl' % t,'rb'))
 
     # List of Cloudlet objects
     result = []
-    # Cloudlet ID; unique at each time step
+    # Cloudlet id; unique at each time step
     n = 0
-    # DISCUSSION ITEM
+    # DISCUSSION ITEM, why these tresholds?
     for cloudlet in cloudlets:
         if ((len(cloudlet['plume']) > 7) 
             or (len(cloudlet['condensed']) > 1)
@@ -353,6 +369,8 @@ def load_cloudlets(t, MC):
     return result
 
 def save_clusters(clusters, t):
+    """Save clusters at time t.
+    """
     new_clusters = {}
     for id, clust in clusters.iteritems():
         new_dict = {}
@@ -369,9 +387,13 @@ def save_clusters(clusters, t):
 
 def cluster_cloudlets(MC):
 
+    # Load and process initial cloudlets
     print "cluster cloudlets; time step: 0"
-    cloudlets = load_cloudlets(0, MC)    
+    cloudlets = load_cloudlets(0, MC)
+    # Find the spatially neighbouring cloudlets for each cloudlet; separate into
+    # condensed and plume      
     make_spatial_cloudlet_connections(cloudlets, MC)
+    # Create initial clusters; there are no existing clusters to be passed in
     new_clusters = create_new_clusters(cloudlets, {}, 0, MC)
     print "\t%d clusters" % len(new_clusters)
     save_clusters(new_clusters, 0)
@@ -381,7 +403,7 @@ def cluster_cloudlets(MC):
         old_clusters = new_clusters
         cloudlets = load_cloudlets(t, MC)
 
-        # Finds the ids of all the previous timestep's cloudlets that overlap
+        # Finds the ids of all the previous timestep's clusters that overlap
         # the current timestep's cloudlets
         make_temporal_connections(cloudlets, old_clusters, MC)
 

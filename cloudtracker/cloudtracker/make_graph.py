@@ -79,7 +79,7 @@ def make_graph(MC):
                 node2 = '%08g|%08g' % (t, item)
                 splits[node2] = node1            
         
-            # Construct a graph of the cloudlet connections
+            # Construct a graph of the cluster connections
             graph.add_node('%08g|%08g' % (t, id), attr_dict = attr_dict)
             if clusters[id]['past_connections']:
                 for item in clusters[id]['past_connections']:
@@ -126,6 +126,7 @@ def make_graph(MC):
         # Otherwise, put it in cloud_graphs
         condensed_time = set()
         core_time = set()
+        # Cloud total volumes over lifetime
         condensed_volume = 0
         core_volume = 0
         for node in subgraph.nodes():
@@ -141,8 +142,8 @@ def make_graph(MC):
                 time = int(node[:8])
                 core_time.add(time)
 
-        # Clouds with no core are noise??
-        # DISCUSSION ITEM
+        # If a cloud exists less than 2 minutes, classify it as noise
+        # Clouds that never have a core are considered noise
         if (len(condensed_time) < 2) or (len(core_time) == 0):
             cloud_noise.append(subgraph)
         else:
@@ -151,6 +152,8 @@ def make_graph(MC):
             times.sort()
             cloud_times.append(tuple(times))
 
+    # Cloud with largest condensed volume sorted first; volume not used any
+    # further
     cloud_graphs.sort()
     cloud_graphs.reverse()
     cloud_graphs = [item[1] for item in cloud_graphs]

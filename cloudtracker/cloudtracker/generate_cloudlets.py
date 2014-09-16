@@ -56,9 +56,11 @@ def expand_current_cloudlets(key, cloudlets, mask, MC):
     for cloudlet in cloudlets:
         cloudlet_points.append([cloudlet[key]])
 
+    # Index in list of cloudlets
     cloudlet_expand_indexes = range(len(cloudlet_points))
 
-    # Iterate while expansion is possible
+    # Iterate while expansion is possible; start with initial cloudlets
+    # Continue with list of cloudlets that expanded during the previous iteration
     while cloudlet_expand_indexes:
         next_loop_cloudlet_list = []
             
@@ -132,7 +134,7 @@ def find_mean_cloudlet_velocity(cloudlets, u, v, w, MC):
     for cloudlet in cloudlets:
         # Condensed region
         if len(cloudlet['condensed']) > 0:
-            K, J, I = index_to_zyx( cloudlet['condensed'], MC )
+            K, J, I = index_to_zyx(cloudlet['condensed'], MC)
             # Find the mean motion of the cloudlet; account for geostrophic
             # translation of domain in SAM
             u_mean = u[K, J, I].mean()-ug
@@ -175,7 +177,7 @@ def generate_cloudlets(core, condensed, plume, u, v, w, MC):
     plume[condensed] = False
     # Condensed doesn't overlap core
     condensed[core] = False
-
+    
     # Create the list that will hold the cloudlets; add core cloudlets
     cloudlets = make_new_cloudlets('core', core, MC)
                     
@@ -183,7 +185,7 @@ def generate_cloudlets(core, condensed, plume, u, v, w, MC):
     for cloudlet in cloudlets:
         cloudlet['condensed'] = cloudlet['core'][:]
             
-    # All current cloudlets are core cloudlets
+    # All current cloudlets have a core
     ncore = len(cloudlets)
     print "\t%d core cloudlets" % ncore
     
@@ -205,7 +207,7 @@ def generate_cloudlets(core, condensed, plume, u, v, w, MC):
     for cloudlet in cloudlets:
         cloudlet['plume'] = cloudlet['condensed'][:]
 
-    # Calculate number of condensed only cloudlets
+    # Calculate number of condensed cloudlets with no core
     ncondensed = len(cloudlets)
     print "\t%d condensed cloudlets" % (ncondensed-ncore)
 
@@ -236,4 +238,3 @@ def generate_cloudlets(core, condensed, plume, u, v, w, MC):
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-

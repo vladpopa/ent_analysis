@@ -7,8 +7,8 @@ import multiprocessing as mp
 from multiprocessing import Pool
 PROC = 16
 
-import ent_analysis.lib.model_param as mc
-from ent_analysis.conversion import convert, generate_tracking
+import lib.model_param as mc
+from conversion import convert, generate_tracking
 import cloudtracker.cloudtracker.main as cloudtracker
 
 # Default working directory for ent_analysis package
@@ -32,17 +32,17 @@ def run_conversion():
     os.chdir(mc.input_directory)
     
     # Ensure the data folders exist at the target location
-    if not os.path.exists(mc.data_directory):
-        os.makedirs(mc.data_directory)
-    
-    if not os.path.exists('%s/variables/' % (mc.data_directory)):
-        os.makedirs('%s/variables/' % (mc.data_directory))
-    if not os.path.exists('%s/tracking/' % (mc.data_directory)):
-        os.makedirs('%s/tracking/' % (mc.data_directory))
-    if not os.path.exists('%s/core_entrain/' % (mc.data_directory)):
-        os.makedirs('%s/core_entrain/' % (mc.data_directory))
-    if not os.path.exists('%s/condensed_entrain/' % (mc.data_directory)):
-        os.makedirs('%s/condensed_entrain/' % (mc.data_directory))
+    # if not os.path.exists(mc.data_directory):
+    #     os.makedirs(mc.data_directory)
+    #
+    # if not os.path.exists('%s/variables/' % (mc.data_directory)):
+    #     os.makedirs('%s/variables/' % (mc.data_directory))
+    # if not os.path.exists('%s/tracking/' % (mc.data_directory)):
+    #     os.makedirs('%s/tracking/' % (mc.data_directory))
+    # if not os.path.exists('%s/core_entrain/' % (mc.data_directory)):
+    #     os.makedirs('%s/core_entrain/' % (mc.data_directory))
+    # if not os.path.exists('%s/condensed_entrain/' % (mc.data_directory)):
+    #     os.makedirs('%s/condensed_entrain/' % (mc.data_directory))
     
     # # Generate cloud field statistic
     # convert.convert_stat()
@@ -57,7 +57,7 @@ def run_conversion():
     
     # generate_tracking
     filelist = glob.glob('%s/variables/*.nc' % (mc.data_directory))
-    #wrapper(pkg, 'generate_tracking', 'main', filelist)
+    # wrapper(pkg, 'generate_tracking', 'main', filelist)
     # for file_name in filelist:
     #     generate_tracking.main(file_name)
 
@@ -117,7 +117,7 @@ def run_id_profiles():
 if __name__ == '__main__':
     run_conversion()
     run_cloudtracker()
-    run_profiler()
-    run_id_profiles()
+    # run_profiler()
+    # run_id_profiles()
     
     print 'Entrainment analysis completed'

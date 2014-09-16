@@ -1,6 +1,6 @@
 #!/usr/bin/python                                                         
 import os, glob, shutil, sys
-import ent_analysis.lib.model_param as mc
+import lib.model_param as mc
 
 SAM = mc.sam_directory
 CONVERTER = SAM + '/UTIL/bin3D2nc '

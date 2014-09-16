@@ -197,8 +197,8 @@ class Cluster:
         return result
 
     def connected_cloudlet_groups(self):
-    """ Split cluster if both components are connected to ground.
-    """
+        """ Split cluster if both components are connected to ground.
+        """
         # Generate lists of condensed and plume cloudlets
         plume_cloudlets = []
         condensed_cloudlets = []

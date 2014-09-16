@@ -1,6 +1,6 @@
 #!/usr/bin/python                                                                                             
 import os, glob, shutil
-import ent_analysis.lib.model_param as mc
+import lib.model_param as mc
 
 def transfer(filename):
 	path, name = os.path.split(filename)

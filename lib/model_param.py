@@ -27,6 +27,9 @@ sam_directory = model_config['sam_directory']
 
 if(do_entrainment):
     nt = len( glob.glob('%s/%s_CORE_*' % (input_directory, case_name)))
+    # TEMPORARY CLUDGE!!!!!!!!!!! **********************************************
+    nt = 3
+    # TEMPORARY CLUDGE!!!!!!!!!!! **********************************************
 else:
     nt = len( glob.glob('%s/%s_[!A-Z]*' % (input_directory, case_name)))
 

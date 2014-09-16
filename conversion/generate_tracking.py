@@ -21,8 +21,8 @@ from pylab import *
 from netCDF4 import Dataset
 import glob
 sys.path.append('/home/vpopa/repos/python')
-from ent_analysis.lib.thermo import SAM
-import ent_analysis.lib.model_param as mc
+from lib.thermo import SAM
+import lib.model_param as mc
 
 def main(filename):
     time_step = mc.time_picker(filename)
