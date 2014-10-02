@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-#Runtime (690,130,128,128): ?
-
 import cPickle
 import networkx
 
@@ -158,12 +156,14 @@ def make_graph(MC):
         # if len(plume_time) < 2:
             cloud_noise.append(subgraph)
         else:
-            # DISCUSSION ITEM: what is in 'times'????
             cloud_graphs.append((condensed_volume, subgraph))
-            times = list(times)
-            #print(tuple([list(plume_time), list(condensed_time), list(core_time)]))
-            times.sort()
-            cloud_times.append(tuple(times))
+            plume_time = list(plume_time)
+            plume_time.sort()
+            condensed_time = list(condensed_time)
+            condensed_time.sort()
+            core_time = list(core_time)
+            core_time.sort()
+            cloud_times.append(tuple([plume_time, condensed_time, core_time]))
 
     # Cloud with largest condensed volume sorted largest to smallest; volume not 
     # used any further
