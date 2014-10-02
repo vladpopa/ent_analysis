@@ -29,8 +29,6 @@ def make_spatial_cloudlet_connections(cloudlets, MC):
         condensed_array[cloudlet.condensed_mask()] = cloudlet.id
         plume_array[cloudlet.plume_mask()] = cloudlet.id
 
-    # DISCUSSION ITEM: we're not keeping track of CORE--CORE neighbours
-    # PLUME: keep track of CORE--CORE neighbours?
     for cloudlet in cloudlets:
         # Find adjacent condensed regions for each cloudlet's condensed region
         adjacent_condensed = condensed_array[cloudlet.condensed_halo()]
@@ -184,10 +182,6 @@ def create_new_clusters(cloudlets, clusters, max_id, MC):
 
         clusters[max_id] = cluster
         max_id = max_id + 1
-        # DISCUSSION ITEM
-        # new clouds are never explanded into plume region; this doesn't matter
-        # for time step 1, but how about later?
-        # PLUME: add code to expand into plume cloudlets here
                 
     # Make clusters out of the cloudlets without core points, but which have 
     # condensed points
@@ -199,14 +193,9 @@ def create_new_clusters(cloudlets, clusters, max_id, MC):
         # Condensed only cloudlets are contiguous; shouldn't have neighbours
         if (len(cluster.adjacent_cloudlets('condensed')) > 0): 
             print "condensed connection ERROR"
-        
-        # DISCUSSION ITEM
-        # missing code?
-        # clusters[max_id] = cluster
-        # max_id = max_id + 1        
-        # DISCUSSION ITEM
-        # initial clouds are never explanded into plume region
-        # PLUME: add code to expand into plume cloudlets here
+
+        clusters[max_id] = cluster
+        max_id = max_id + 1
                         
     # Make clusters out of the cloudlets without core or condensed points
     while plume_list:
@@ -214,9 +203,10 @@ def create_new_clusters(cloudlets, clusters, max_id, MC):
         cluster = Cluster(max_id, [cloudlet], MC)
         # "New plume cluster" event
         cluster.events.append('NP')
+
         # Plume only cloudlets are contiguous; shouldn't have neighbours
-        # if (len(cluster.adjacent_cloudlets('plume')) > 0):
-        #     print "plume connection ERROR"
+        if (len(cluster.adjacent_cloudlets('plume')) > 0):
+            print "plume connection ERROR"
         clusters[max_id] = cluster
         max_id = max_id + 1
 
@@ -358,7 +348,7 @@ def load_cloudlets(t, MC):
     result = []
     # Cloudlet id; unique at each time step
     n = 0
-    # DISCUSSION ITEM, why these tresholds?
+    
     for cloudlet in cloudlets:
         if ((len(cloudlet['plume']) > 7) 
             or (len(cloudlet['condensed']) > 1)
