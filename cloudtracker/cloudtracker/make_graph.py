@@ -98,8 +98,7 @@ def make_graph(MC):
 
         # If cloud exists for less than 5 minutes, check if it has split events
         # If it has split events, remove them and reconnect the cloud
-        # TODO: strictly 5 is hardcoded to 1 min snanpshots; fix
-        if len(times) < 5:
+        if len(times) < 5*60/MC['dt']:
             for node in subgraph:
                 if subgraph.node[node]['split']:
                     item = subgraph.node[node]['split'].pop()
@@ -114,8 +113,7 @@ def make_graph(MC):
                 times.add(int(node[:8]))
 
         # If a cloud exists less than 5 minutes, check for merge events
-        # TODO: strictly 5 is hardcoded to 1 min snanpshots; fix
-        if len(times) < 5:
+        if len(times) < 5*60/MC['dt']:
             for node in subgraph:
                 if subgraph.node[node]['merge']:
                     item = subgraph.node[node]['merge'].pop()
@@ -156,8 +154,7 @@ def make_graph(MC):
 
         # If a cloud exists less than 2 minutes, classify it as noise
         # Clouds that never have a core are considered noise
-        # TODO: strictly 5 is hardcoded to 2 min snanpshots; fix
-        if (len(condensed_time) < 2) or (len(core_time) == 0):
+        if (len(condensed_time) < 2*60/MC['dt']) or (len(core_time) == 0):
         # if len(plume_time) < 2:
             cloud_noise.append(subgraph)
         else:
