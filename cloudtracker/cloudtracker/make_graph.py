@@ -13,6 +13,7 @@ def full_output(cloud_times, cloud_graphs, merges, splits, MC):
     n = 0
     clouds = {}
     for subgraph in cloud_graphs:
+        # Clouds include plume only clusters
         events = {'has_condensed': False, 'has_core': False}
         for node in subgraph:
             node_events = []
@@ -39,6 +40,7 @@ def full_output(cloud_times, cloud_graphs, merges, splits, MC):
             else:
                 events[t] = node_events[:]
 
+        # Store cloud events and increment cloud id
         clouds[n] = events
         n = n + 1
 
@@ -96,13 +98,14 @@ def make_graph(MC):
 
         # If cloud exists for less than 5 minutes, check if it has split events
         # If it has split events, remove them and reconnect the cloud
+        # TODO: strictly 5 is hardcoded to 1 min snanpshots; fix
         if len(times) < 5:
             for node in subgraph:
                 if subgraph.node[node]['split']:
                     item = subgraph.node[node]['split'].pop()
                     t = int(node[:8])
                     graph.add_edge(node, '%08g|%08g' % (t, item))
-
+ 
     for subgraph in networkx.connected_component_subgraphs(graph):
         # Find the duration over which the cloud_graph has cloudy points.
         times = set()
@@ -111,6 +114,7 @@ def make_graph(MC):
                 times.add(int(node[:8]))
 
         # If a cloud exists less than 5 minutes, check for merge events
+        # TODO: strictly 5 is hardcoded to 1 min snanpshots; fix
         if len(times) < 5:
             for node in subgraph:
                 if subgraph.node[node]['merge']:
@@ -124,9 +128,11 @@ def make_graph(MC):
     for subgraph in networkx.connected_component_subgraphs(graph):
         # If a cloud exists less than 2 minutes, classify it as noise
         # Otherwise, put it in cloud_graphs
+        plume_time = set()
         condensed_time = set()
         core_time = set()
         # Cloud total volumes over lifetime
+        plume_volume = 0
         condensed_volume = 0
         core_volume = 0
         for node in subgraph.nodes():
@@ -142,18 +148,28 @@ def make_graph(MC):
                 time = int(node[:8])
                 core_time.add(time)
 
+            plume_vol = subgraph.node[node]['plume'] 
+            if plume_vol > 0:
+                plume_volume = plume_volume + plume_vol
+                time = int(node[:8])
+                plume_time.add(time)
+
         # If a cloud exists less than 2 minutes, classify it as noise
         # Clouds that never have a core are considered noise
+        # TODO: strictly 5 is hardcoded to 2 min snanpshots; fix
         if (len(condensed_time) < 2) or (len(core_time) == 0):
+        # if len(plume_time) < 2:
             cloud_noise.append(subgraph)
         else:
+            # DISCUSSION ITEM: what is in 'times'????
             cloud_graphs.append((condensed_volume, subgraph))
             times = list(times)
+            #print(tuple([list(plume_time), list(condensed_time), list(core_time)]))
             times.sort()
             cloud_times.append(tuple(times))
 
-    # Cloud with largest condensed volume sorted first; volume not used any
-    # further
+    # Cloud with largest condensed volume sorted largest to smallest; volume not 
+    # used any further
     cloud_graphs.sort()
     cloud_graphs.reverse()
     cloud_graphs = [item[1] for item in cloud_graphs]
