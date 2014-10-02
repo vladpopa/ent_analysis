@@ -150,10 +150,8 @@ def make_graph(MC):
                 time = int(node[:8])
                 plume_time.add(time)
 
-        # If a cloud exists less than 2 minutes, classify it as noise
-        # Clouds that never have a core are considered noise
-        if (len(condensed_time) < 2*60/MC['dt']) or (len(core_time) == 0):
-        # if len(plume_time) < 2:
+        # If a graph exists less than 2 minutes, classify it as noise.     
+        if len(plume_time) < 2:
             cloud_noise.append(subgraph)
         else:
             cloud_graphs.append((condensed_volume, subgraph))
