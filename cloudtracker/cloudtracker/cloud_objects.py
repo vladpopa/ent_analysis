@@ -271,6 +271,7 @@ class Cluster:
             else:
                 groups = detached_groups
 
+        # Split groups of connected plume cloudlets
         while plume_cloudlets:
             cloudlet = plume_cloudlets.pop()
             group = [cloudlet, ]

@@ -153,17 +153,17 @@ def output_cloud_data(cloud_graphs, cloud_noise, t, MC):
     # Add all the noise to a noise cluster
     noise_clust = {'core': [], 'condensed': [], 'plume': []}
     for subgraph in cloud_noise:
-        nodes = [item for item in subgraph.nodes() 
+        nodes = [item for item in subgraph.nodes()
                        if item[:8] == ('%08g' % t)]
         if nodes:
             for node in nodes:
                 noise_clust['core'].append(clusters[node]['core'])
                 noise_clust['condensed'].append(clusters[node]['condensed'])
                 noise_clust['plume'].append(clusters[node]['plume'])
-                    
-    if noise_clust['core']:                    
-        noise_clust['core'] = numpy.hstack(noise_clust['core'])         
-    if noise_clust['condensed']: 
+
+    if noise_clust['core']:
+        noise_clust['core'] = numpy.hstack(noise_clust['core'])
+    if noise_clust['condensed']:
         noise_clust['condensed'] = numpy.hstack(noise_clust['condensed'])
     if noise_clust['plume']:
         noise_clust['plume'] = numpy.hstack(noise_clust['plume'])
