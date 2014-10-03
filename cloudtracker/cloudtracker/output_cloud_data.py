@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# Runtime (690, 130, 128, 128): 1 hour 20 minutes
 
 import cPickle
 import networkx
@@ -7,9 +6,11 @@ import numpy
 from utility_functions import zyx_to_index, index_to_zyx, calc_radii, \
     expand_indexes
 import sys
-#import scipy.io
 
 def calc_shell(index, MC):
+    """ Find all grid points just outside a cloud.
+    """
+    
     # Expand the cloud points outward
     maskindex = expand_indexes(index, MC)
     
@@ -19,7 +20,9 @@ def calc_shell(index, MC):
     return shellindex
 
 def calc_edge(index, shellindex, MC):
-    # Find all the points just inside the clouds
+    """ Find all grid points just inside a cloud.
+    """
+    
     maskindex = expand_indexes(shellindex, MC)
     
     # From the expanded mask, select the points inside the cloud
@@ -27,33 +30,36 @@ def calc_edge(index, shellindex, MC):
 
     return edgeindex
 
-
 def calc_env(index, shellindex, edgeindex, MC):
+    """ Find all grid point within 4 grid cells of index.
+    """
+    
+    # Environment is only defined if there is a shell
     if len(shellindex) > 0:
         K_J_I = index_to_zyx(shellindex, MC)
 
+        # Expand out an arbitrary number of times to ensure we capture 4
+        # adjacent grid cells
         n = 6
         for i in range(n):
-            # Find all the points just outside the clouds
+            # Find all the points just outside the clouds (in the horizontal)
             stacklist = [K_J_I, ]
-            for item in ((0, -1, 0), (0, 1, 0),
-                         (0, 0, -1), (0, 0, 1)):
-                stacklist.append( K_J_I + numpy.array(item)[:, numpy.newaxis] )
-
+            for item in ((0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)):
+                stacklist.append(K_J_I + numpy.array(item)[:, numpy.newaxis])
             maskindex = numpy.hstack(stacklist)
+            # Correct for the re-entrant domain
             maskindex[1, :] = maskindex[1, :] % MC['ny']
             maskindex[2, :] = maskindex[2, :] % MC['nx']            
-            maskindex = numpy.unique( zyx_to_index(maskindex[0, :],
-                                                   maskindex[1, :],
-                                                   maskindex[2, :],
-                                                   MC) )
+            maskindex = numpy.unique(
+                zyx_to_index(maskindex[0, :], maskindex[1, :], maskindex[2, :],
+                MC))
 
             # From the expanded mask, select the points outside the cloud
-            envindex = numpy.setdiff1d(maskindex, index, assume_unique = True)
+            envindex = numpy.setdiff1d(maskindex, index, assume_unique=True)
 
             K_J_I = index_to_zyx(envindex, MC)
             
-        # Select the points within 4 grid cells of cloud
+        # Select the points within 4 grid cells
         r = calc_radii(envindex, edgeindex, MC)
         mask = r < 4.5
         envindex = envindex[mask]
@@ -62,11 +68,16 @@ def calc_env(index, shellindex, edgeindex, MC):
 
     return envindex
 
-
 def calculate_data(cluster, MC):
     result = {}
 
+    plume = cluster['plume']
     result['plume'] = cluster['plume']
+    plume_shell = calc_shell(plume, MC)
+    result['plume_shell'] = plume_shell
+    plume_edge = calc_edge(plume, plume_shell, MC)
+    result['plume_edge'] = plume_edge
+    result['plume_env'] = calc_env(plume, plume_shell, plume_edge, MC)
 
     condensed = cluster['condensed']
     result['condensed'] = condensed
@@ -74,7 +85,8 @@ def calculate_data(cluster, MC):
     result['condensed_shell'] = condensed_shell
     condensed_edge = calc_edge(condensed, condensed_shell, MC)
     result['condensed_edge'] = condensed_edge
-    result['condensed_env'] = calc_env(condensed, condensed_shell, condensed_edge, MC)
+    result['condensed_env'] = calc_env(
+        condensed, condensed_shell, condensed_edge, MC)
 
     core = cluster['core']
     result['core'] = core
