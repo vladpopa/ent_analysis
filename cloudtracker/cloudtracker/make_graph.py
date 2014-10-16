@@ -5,7 +5,6 @@ import networkx
 full_output=False
 
 def full_output(cloud_times, cloud_graphs, merges, splits, MC):
-    cloud_times = tuple(cloud_times)
     cPickle.dump(cloud_times, open('pkl/cloud_times.pkl','wb'))
 
     n = 0
@@ -150,24 +149,29 @@ def make_graph(MC):
                 time = int(node[:8])
                 plume_time.add(time)
 
-        # If a graph exists less than 2 minutes, classify it as noise.     
+        # If a graph exists less than 2 minutes, classify it as noise.
+        # NEW: SORTING BY PLUME VOLUME   
         if len(plume_time) < 2:
             cloud_noise.append(subgraph)
         else:
-            cloud_graphs.append((condensed_volume, subgraph))
+            cloud_graphs.append((plume_volume, subgraph))
             plume_time = list(plume_time)
             plume_time.sort()
             condensed_time = list(condensed_time)
             condensed_time.sort()
             core_time = list(core_time)
             core_time.sort()
-            cloud_times.append(tuple([plume_time, condensed_time, core_time]))
+            cloud_times.append(
+                (plume_volume, plume_time, condensed_time, core_time))
 
     # Cloud with largest condensed volume sorted largest to smallest; volume not 
     # used any further
     cloud_graphs.sort()
     cloud_graphs.reverse()
     cloud_graphs = [item[1] for item in cloud_graphs]
+    cloud_times.sort()
+    cloud_times.reverse()
+    cloud_times = [item[1:] for item in cloud_times]
     
     if full_output: full_output(cloud_times, cloud_graphs, merges, splits, MC)
 
