@@ -12,10 +12,10 @@ import os
 
 #--------------
 
-def make_profile(z_indexes, y_indexes, x_indexes,
-                 data, vars, profiles):
+def make_profile(z_indexes, y_indexes, x_indexes, data, vars, profiles):
 
     z = numpy.unique(z_indexes)
+    # Average properties at each height
     for k in z:
         mask = (z_indexes == k)
         if mask.sum() == 0: continue
@@ -42,7 +42,8 @@ def create_savefile(t, data, vars, profile_name):
     ids = data['ids'][:]
     z = data['z'][:]
     print 'cdf/%s_profile_%08d.nc' % (profile_name, t)
-    savefile = Dataset('cdf/%s_profile_%08d.nc' % (profile_name, t), 'w', format='NETCDF4')
+    savefile = Dataset(
+        'cdf/%s_profile_%08d.nc' % (profile_name, t), 'w', format='NETCDF4')
     
     # Create savefile
     savefile.createDimension('ids', len(ids))
@@ -75,8 +76,7 @@ def make_profiles(profiles, cloud_data, vars, data, n):
         indexes = cloud_data[item]
         if len(indexes) > 0:
             z, y, x = index_to_zyx(indexes)            
-            results = make_profile(z, y, x,
-                                   data, vars, temp_profile)
+            results = make_profile(z, y, x, data, vars, temp_profile)
         else:
             results = temp_profile       
                                                
@@ -107,12 +107,13 @@ def main(filename):
           'DWDZ': var_calcs.dw_dz,
           'DPDZ': var_calcs.dp_dz,
           'TR01': var_calcs.tr01,
+          # 'RELH': var_calcs.relh
     }
     
     # Automatically load time step from output file name
     time = mc.time_picker(filename)
     
-    # Load CDF Files
+    # Load netCDF Files
     nc_file = Dataset(filename)
     stat_file = Dataset(mc.get_stat())
 
@@ -121,11 +122,9 @@ def main(filename):
             'RHO' : stat_file.variables['RHO'][time,:].astype(double),
             }
     stat_file.close()
-    
-    # For each cloud, iterate over all times
-    cloud_filename = '../cloudtracker/pkl/cloud_data_%08d.pkl' % time
    
-    # Load the cloud data at that timestep
+    # Load the cloud data at current timestep
+    cloud_filename = '../cloudtracker/pkl/cloud_data_%08d.pkl' % time
     clouds = cPickle.load(open(cloud_filename, 'rb'))
        
     ids = clouds.keys()

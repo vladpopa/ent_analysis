@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-import numpy
-
+import numpy as np
 from ent_analysis.lib.thermo import SAM
 import ent_analysis.lib.model_param as mc
+from ent_analysis.lib.thermo import thermo
 
 def area(data, k, j, i):
     return float(len(i))*mc.dx*mc.dy
@@ -58,7 +58,7 @@ def dp_dz(data, k, j, i):
     return (data['PP'][kplus, j, i] - data['PP'][kminus, j, i]).mean()/2/mc.dz
      
 def thetav(data, k, j, i):
-    return SAM.theta_v(data['p'][k, numpy.newaxis, numpy.newaxis]*100., 
+    return SAM.theta_v(data['p'][k, np.newaxis, np.newaxis]*100., 
                        data['TABS'][k, j, i], 
                        data['QV'][k, j, i]/1000., 
                        data['QN'][k, j, i]/1000., 0.).mean()
@@ -74,13 +74,13 @@ def thetav_lapse(data, k, j, i):
                        dp_dz)
     
 def thetal(data, k, j, i):
-    return SAM.theta_l(data['p'][k, numpy.newaxis, numpy.newaxis]*100., 
+    return SAM.theta_l(data['p'][k, np.newaxis, np.newaxis]*100., 
                        data['TABS'][k, j, i], 
                        data['QN'][k, j, i]/1000., 0.).mean()
     
 def mse(data, k, j, i):
     return SAM.h(data['TABS'][k, j, i],
-                 data['z'][k, numpy.newaxis, numpy.newaxis],
+                 data['z'][k, np.newaxis, np.newaxis],
                  data['QN'][k, j, i]/1000., 0.).mean()
 
 def rho(data, k, j, i):
@@ -88,6 +88,13 @@ def rho(data, k, j, i):
 
 def press(data, k, j, i):
     return data['p'][k]*100.
+    
+def relh(data, k, j, i):
+    """Calculate relative humidity.
+    """
+    return thermo.e(data['QV'][k, j, i]/1000., 
+        data['p'][k, np.newaxis, np.newaxis]*100.)/
+        thermo.e_star(data['TABS'][k, j, i])
 
 def dwdt(data, k, j, i):
     return data['DWDT'][k, j, i].mean()
