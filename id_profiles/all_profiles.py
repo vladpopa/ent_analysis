@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-
-import sys, glob, os
-from pylab import *
-import numpy
-import cPickle
+import numpy as np
 try:
 	from netCDF4 import Dataset
 except:
@@ -11,11 +7,10 @@ except:
 		from netCDF3 import Dataset
 	except:
 		from pupynere import netcdf_file as Dataset
-import networkx
-
 import ent_analysis.lib.model_param as mc
 
 def main(item):
+    # Keep track of id encountered at previous time steps
     created_file_ids = []
     for t in range(mc.nt):
         ncfile = Dataset('../time_profiles/cdf/%s_profile_%08d.nc' % (item, t))
@@ -24,13 +19,15 @@ def main(item):
         ids = ncfile.variables['ids'][:]
         z = ncfile.variables['z'][:]
 
+        # Iterate through ids at current time step
         for n, id in enumerate(ids):
             id = int(id)
             print "time: ", t, " id: ", id
+            # New id
             if id not in created_file_ids:
+                # Create new id file
                 savefile = Dataset('cdf/%s_profile_%08d.nc' % (item, id), 'w')
                 
-                # Create savefile
                 savefile.createDimension('t', None)
                 savefile.createDimension('z', len(z))
 
@@ -41,26 +38,29 @@ def main(item):
 
                 for name in ncfile.variables:
                     if name not in ('ids', 'z'):
-                        new_variable = savefile.createVariable(name, 'd', ('t', 'z'))
+                        new_variable = savefile.createVariable(
+                            name, 'd', ('t', 'z'))
                         new_variable[0, :] = ncfile.variables[name][n, :]
                 savefile.close()
                 created_file_ids.append(id)
+            # Existing id
             else:
+                # Existing id file
                 savefile = Dataset('cdf/%s_profile_%08d.nc' % (item, id), 'a')
                 tvar = savefile.variables['t']
                 l = len(tvar)
                 tvar[l] = t
                 for name in ncfile.variables:
                     if name not in ('ids', 'z'):
-                        savefile.variables[name][l, :] = ncfile.variables[name][n, :]
+                        savefile.variables[name][l, :] = 
+                            ncfile.variables[name][n, :]
                 savefile.close()
                   
         ncfile.close()
    
 if __name__ == "__main__":
-    for item in ('condensed', 'condensed_env', 
-      'condensed_edge', 'condensed_shell',
-      'core','core_env', 
-      'core_edge', 'core_shell',
-      'plume', 'surface', 'condensed_entrain', 'core_entrain'):
+    for item in ('plume', 'plume_env', 'plume_edge', 'plume_shell',
+        'condensed', 'condensed_env', 'condensed_edge', 'condensed_shell',
+        'core','core_env', 'core_edge', 'core_shell',
+        'surface', 'condensed_entrain', 'core_entrain'):
         main(item)
