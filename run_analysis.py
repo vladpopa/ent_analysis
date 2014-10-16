@@ -32,34 +32,34 @@ def run_conversion():
     os.chdir(mc.input_directory)
     
     # Ensure the data folders exist at the target location
-    # if not os.path.exists(mc.data_directory):
-    #     os.makedirs(mc.data_directory)
-    #
-    # if not os.path.exists('%s/variables/' % (mc.data_directory)):
-    #     os.makedirs('%s/variables/' % (mc.data_directory))
-    # if not os.path.exists('%s/tracking/' % (mc.data_directory)):
-    #     os.makedirs('%s/tracking/' % (mc.data_directory))
-    # if not os.path.exists('%s/core_entrain/' % (mc.data_directory)):
-    #     os.makedirs('%s/core_entrain/' % (mc.data_directory))
-    # if not os.path.exists('%s/condensed_entrain/' % (mc.data_directory)):
-    #     os.makedirs('%s/condensed_entrain/' % (mc.data_directory))
+    if not os.path.exists(mc.data_directory):
+        os.makedirs(mc.data_directory)
+
+    if not os.path.exists('%s/variables/' % (mc.data_directory)):
+        os.makedirs('%s/variables/' % (mc.data_directory))
+    if not os.path.exists('%s/tracking/' % (mc.data_directory)):
+        os.makedirs('%s/tracking/' % (mc.data_directory))
+    if not os.path.exists('%s/core_entrain/' % (mc.data_directory)):
+        os.makedirs('%s/core_entrain/' % (mc.data_directory))
+    if not os.path.exists('%s/condensed_entrain/' % (mc.data_directory)):
+        os.makedirs('%s/condensed_entrain/' % (mc.data_directory))
     
-    # # Generate cloud field statistic
-    # convert.convert_stat()
-    # 
-    # # bin3d2nc conversion
-    # filelist = glob.glob('%s/*.bin3D' % mc.input_directory)
-    # wrapper(pkg, 'convert', 'convert', filelist)
-    #     
-    # # Move the netCDF files to relevant locations
-    # filelist = glob.glob('./*.nc')
-    # wrapper(pkg, 'nc_transfer', 'transfer', filelist)
+    # Generate cloud field statistics
+    convert.convert_stat()
+
+    # bin3d2nc conversion
+    filelist = glob.glob('%s/*.bin3D' % mc.input_directory)
+    wrapper(pkg, 'convert', 'convert', filelist)
+
+    # Move the netCDF files to relevant locations
+    filelist = glob.glob('./*.nc')
+    wrapper(pkg, 'nc_transfer', 'transfer', filelist)
     
     # generate_tracking
     filelist = glob.glob('%s/variables/*.nc' % (mc.data_directory))
-    # wrapper(pkg, 'generate_tracking', 'main', filelist)
-    # for file_name in filelist:
-    #     generate_tracking.main(file_name)
+    wrapper(pkg, 'generate_tracking', 'main', filelist)
+    for file_name in filelist:
+        generate_tracking.main(file_name)
 
 def run_cloudtracker():
     # Change the working directory for cloudtracker
@@ -117,7 +117,7 @@ def run_id_profiles():
 if __name__ == '__main__':
     run_conversion()
     run_cloudtracker()
-    # run_profiler()
-    # run_id_profiles()
+    run_profiler()
+    run_id_profiles()
     
     print 'Entrainment analysis completed'

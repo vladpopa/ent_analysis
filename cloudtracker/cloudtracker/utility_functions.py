@@ -110,15 +110,15 @@ def calc_radii(data, reference, MC):
     
     result = numpy.ones(data.shape, numpy.float)*(nx + ny)
 
+    # Heights at which ref_points has values
     k_values = numpy.unique(ref_points[0,:])
     
     for k in k_values:
+        # Filter data_points and ref_points at current height
         data_mask = data_points[0, :] == k
         ref_mask = ref_points[0, :] == k
-        
         k_data = data_points[:, data_mask]
         k_ref = ref_points[:, ref_mask]
-        
         m = k_data.shape[1]
         n = k_ref.shape[1]
         
