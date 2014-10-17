@@ -43,8 +43,6 @@ def full_output(cloud_times, cloud_graphs, merges, splits, MC):
 
     cPickle.dump(clouds, open('pkl/graph_events.pkl', 'wb'))
 
-#---------------------
-
 def make_graph(MC):
     graph = networkx.Graph()
 
@@ -121,7 +119,7 @@ def make_graph(MC):
     cloud_graphs = []
     cloud_noise = []
     for subgraph in networkx.connected_component_subgraphs(graph):
-        # If a cloud exists less than 2 minutes, classify it as noise
+        # If a graph exists less than 2 minutes, classify it as noise
         # Otherwise, put it in cloud_graphs
         plume_time = set()
         condensed_time = set()
@@ -149,9 +147,8 @@ def make_graph(MC):
                 time = int(node[:8])
                 plume_time.add(time)
 
-        # If a graph exists less than 2 minutes, classify it as noise.
-        # NEW: SORTING BY PLUME VOLUME   
-        if len(plume_time) < 2:
+        # If a graph exists less than 2 minutes, classify it as noise.     
+        if len(plume_time) < 2*60/MC['dt']:
             cloud_noise.append(subgraph)
         else:
             cloud_graphs.append((plume_volume, subgraph))

@@ -52,6 +52,7 @@ def make_profiles(variables, cloud_data, vars, data, n):
 
         indexes = cloud_data[item]
         if len(indexes) > 0:
+            # for each index find the index one level above and one level below
             indexes2 = indexes + mc.nx*mc.ny
             a = ~np.in1d(indexes, indexes2, assume_unique=True)
             indexes2 = indexes - mc.nx*mc.ny
@@ -59,6 +60,8 @@ def make_profiles(variables, cloud_data, vars, data, n):
         
             z, y, x = mc.index_to_zyx(indexes)
         
+            # same check one point in the horizontal, account for reentrant 
+            # domain
             x2  = (x+1) % mc.nx
             indexes2 = mc.zyx_to_index(z, y, x2)
             c = ~np.in1d(indexes, indexes2, assume_unique=True)
@@ -66,12 +69,17 @@ def make_profiles(variables, cloud_data, vars, data, n):
             indexes2 = mc.zyx_to_index(z, y, x2)
             d = ~np.in1d(indexes, indexes2, assume_unique=True)
 
+            # same check one point in the horizontal, account for reentrant 
+            # domain
             y2  = (y+1) % mc.ny
             indexes2 = mc.zyx_to_index(z, y2, x)
             e = ~np.in1d(indexes, indexes2, assume_unique=True)
             y2  = (y-1) % mc.ny
             indexes2 = mc.zyx_to_index(z, y2, x)
             f = ~np.in1d(indexes, indexes2, assume_unique=True)
+            
+            # up to this point we seem to have the x, y and z surfaces of the 
+            # cloud
             
             area = mc.dx*mc.dy*(a+b) + mc.dy*mc.dz*(c+d) + mc.dx*mc.dz*(e+f)
 
