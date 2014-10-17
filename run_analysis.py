@@ -1,15 +1,15 @@
 #!/usr/bin/env python
-
 import glob, os, sys
-
 # Multiprocessing modules
 import multiprocessing as mp
 from multiprocessing import Pool
 PROC = 16
-
 import lib.model_param as mc
 from conversion import convert, generate_tracking
 import cloudtracker.cloudtracker.main as cloudtracker
+import time_stats.core_time_stats as core_time_stats
+import time_stats.condensed_time_stats as condensed_time_stats
+import time_stats.plume_time_stats as plume_time_stats
 
 # Default working directory for ent_analysis package
 cwd = os.getcwd()
@@ -22,8 +22,7 @@ profiles = {'condensed', 'condensed_env', 'condensed_edge', \
 def wrapper(module_name, script_name, function_name, filelist):
     pkg = __import__ (module_name, globals(), locals(), ['*'])
     md = getattr(pkg, script_name)
-    fn = getattr(md, function_name)
-    
+    fn = getattr(md, function_name) 
     pool = mp.Pool(PROC)
     pool.map(fn, filelist)
     
@@ -54,7 +53,7 @@ def run_conversion():
     # Move the netCDF files to relevant locations
     filelist = glob.glob('./*.nc')
     wrapper(pkg, 'nc_transfer', 'transfer', filelist)
-    
+
     # generate_tracking
     filelist = glob.glob('%s/variables/*.nc' % (mc.data_directory))
     wrapper(pkg, 'generate_tracking', 'main', filelist)
@@ -71,7 +70,7 @@ def run_cloudtracker():
     
     # Swap input directory for cloudtracker 
     model_config['input_directory'] = mc.data_directory + '/tracking/'
-    cloudtracker.main(model_config) 
+    cloudtracker.main(model_config)
 
 def run_profiler():
     # Time Profiles
@@ -85,21 +84,21 @@ def run_profiler():
     # Main thermodynamic profiles
     filelist = glob.glob('%s/variables/*.nc' % (mc.data_directory))
     wrapper(pkg, 'make_profiles', 'main', filelist)
-    
+
     if(mc.do_entrainment):
         filelist = glob.glob('%s/core_entrain/*.nc' % (mc.data_directory))
         wrapper(pkg, 'core_entrain_profiles', 'main', filelist)
-        
+
         filelist = glob.glob('%s/condensed_entrain/*.nc' % (mc.data_directory))
         wrapper(pkg, 'condensed_entrain_profiles', 'main', filelist)
-    
+
     # Chi Profiles
     filelist = glob.glob('cdf/core_env*.nc')
     wrapper(pkg, 'chi_core', 'makechi', filelist)
-    
+
     filelist = glob.glob('cdf/condensed_env*.nc')
     wrapper(pkg, 'chi_condensed', 'makechi', filelist)
-    
+
     # Surface Profiles (based on cloud tracking algorithm)
     wrapper(pkg, 'surface_profiles', 'main', range(mc.nt))
 
@@ -113,11 +112,24 @@ def run_id_profiles():
         os.makedirs('%s/id_profiles/cdf' % (cwd))
 
     wrapper(pkg, 'all_profiles', 'main', profiles)
+    
+def run_time_stats():
+    pkg = 'time_stats'
+    os.chdir('%s/time_stats' % (cwd))   
+
+    # Ensure output folder exists
+    if not os.path.exists('%s/time_stats/npy' % (cwd)):
+        os.makedirs('%s/time_stats/npy' % (cwd))
+    
+    core_time_stats.core_time_stats()
+    condensed_time_stats.condensed_time_stats()
+    plume_time_stats.plume_time_stats()
 
 if __name__ == '__main__':
     run_conversion()
     run_cloudtracker()
     run_profiler()
     run_id_profiles()
+    run_time_stats()
     
     print 'Entrainment analysis completed'
