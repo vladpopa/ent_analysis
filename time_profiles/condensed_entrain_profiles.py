@@ -5,9 +5,9 @@ import numpy
 import cPickle
 import glob
 from netCDF4 import Dataset
-from ent_analysis.lib.thermo import SAM
+from lib.thermo import SAM
 import var_calcs
-import ent_analysis.lib.model_param as mc
+import lib.model_param as mc
 
 #--------------
 

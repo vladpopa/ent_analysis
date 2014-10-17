@@ -4,8 +4,8 @@ import numpy as np
 import cPickle
 from netCDF4 import Dataset
 import os
-from ent_analysis.lib.thermo import SAM
-import ent_analysis.lib.model_param as mc
+from lib.thermo import SAM
+import lib.model_param as mc
 
 # Load mean cloud field statistics
 stat_file = Dataset(mc.get_stat())

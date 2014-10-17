@@ -8,11 +8,11 @@ try:
 except:
     import pickle
 import numpy.ma
-from ent_analysis.lib.thermo import SAM
-from ent_analysis.lib.thermo import thermo
-import ent_analysis.lib.model_param as mc
+from lib.thermo import SAM
+from lib.thermo import thermo
+import lib.model_param as mc
 
-def main():
+def core_time_stats():
     sample_types = ('CORE', 'ENV', 'PLUME')
 
     stats_dict = {}
@@ -109,11 +109,14 @@ def main():
         qsat_cb = qsat[:, k_cb]
         qsat_cb = ones_like(qsat)*qsat_cb[:, np.newaxis]
         cluster_dict['QSAT_CB'] = qsat_cb[mask]
-
-        tv = stat_file.variables['THETAV'][l, :]
-        tv[1:-1] = (tv[2:]-tv[:-2])/mc.dz/2.
-        tv = tv*ones_like(temp)
-        cluster_dict['dTHETAV_dz_MEAN'] = tv[mask]
+        
+        # TEMPORARY CLUDGE!!!!!!!!!!! **********************************************
+        # tv = stat_file.variables['THETAV'][time_step, :]
+        #tv = stat_file.variables['THETAV'][l, :3]
+        # tv = stat_file.variables['THETAV'][l, :]
+        # tv[1:-1] = (tv[2:]-tv[:-2])/mc.dz/2.
+        # tv = tv*ones_like(temp)
+        # cluster_dict['dTHETAV_dz_MEAN'] = tv[mask]
 
         chi = chi_file.variables['chi_theta'][:]
         cluster_dict['CHI'] = chi[mask]
@@ -258,5 +261,5 @@ def main():
     np.save('npy/core_time_stats.npy', stats)
         
 if __name__ == "__main__":
-    main()
+    core_time_stats()
 

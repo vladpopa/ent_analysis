@@ -4,9 +4,9 @@ import numpy as np
 import cPickle
 import glob
 from netCDF4 import Dataset
-from ent_analysis.lib.thermo import SAM
+from lib.thermo import SAM
 import var_calcs
-import ent_analysis.lib.model_param as mc
+import lib.model_param as mc
 import os
 
 def index_to_zyx(index):
@@ -23,6 +23,7 @@ def create_savefile(t, data, vars, profile_name):
     
     Return: netCDF dataset and variables
     """
+    print('Create savefile at time', t)
     ids = data['ids'][:]
     z = data['z'][:]
     print 'cdf/%s_profile_%08d.nc' % (profile_name, t)
@@ -112,6 +113,7 @@ def main(filename):
     
     # Automatically load time step from output file name
     time = mc.time_picker(filename)
+    print('Creating time profiles at time', time)
     
     # Load netCDF files
     nc_file = Dataset(filename)

@@ -126,10 +126,10 @@ def run_time_stats():
     plume_time_stats.plume_time_stats()
 
 if __name__ == '__main__':
-    run_conversion()
-    run_cloudtracker()
-    run_profiler()
-    run_id_profiles()
+    # run_conversion()
+    # run_cloudtracker()
+    # run_profiler()
+    # run_id_profiles()
     run_time_stats()
     
     print 'Entrainment analysis completed'

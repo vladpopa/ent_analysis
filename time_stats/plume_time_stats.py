@@ -7,17 +7,17 @@ try:
 except:
     import pickle
 import numpy.ma
-from ent_analysis.lib.thermo import SAM
-from ent_analysis.lib.thermo import thermo
-import ent_analysis.lib.model_param as mc
+from lib.thermo import SAM
+from lib.thermo import thermo
+import lib.model_param as mc
 
-def plume_stats():
+def plume_time_stats():
     sample_types = ('PLUME', 'EDGE', 'SHELL', 'ENV')
 
     stats_dict = {}
 
-    for tie_step in range(mc.nt):
-        print('Time step number:', tie_step)
+    for time_step in range(mc.nt):
+        print('Time step number:', time_step)
         cluster_dict = {}
         
         # Open plume profile file at current timestep          
@@ -110,16 +110,18 @@ def plume_stats():
                     cluster_dict[var + '_' + type + '-MEAN'] = temp2[mask]
             
             # Compute plume-shell and plume-environment differences                    
-            cluster_dict[var + '_PLUME-ENV'] = cluster_dict[var + '_PLUME'] - 
+            cluster_dict[var + '_PLUME-ENV'] = cluster_dict[var + '_PLUME'] - \
                 cluster_dict[var + '_ENV']
-            cluster_dict[var + '_PLUME-SHELL'] = cluster_dict[var + '_PLUME'] - 
+            cluster_dict[var + '_PLUME-SHELL'] = cluster_dict[var + '_PLUME'] - \
                 cluster_dict[var + '_SHELL']
 
         # ??????????????????????????????????
-        tv = stat_file.variables['THETAV'][time_step, :]
-        tv[1:-1] = (tv[2:]-tv[:-2])/mc.dz/2.
-        tv = tv*ones_like(temp)
-        cluster_dict['dTHETAV_dz_MEAN'] = tv[mask]
+        # TEMPORARY CLUDGE!!!!!!!!!!! **********************************************
+        # tv = stat_file.variables['THETAV'][time_step, :]
+        # tv = stat_file.variables['THETAV'][time_step, :3]
+        # tv[1:-1] = (tv[2:]-tv[:-2])/mc.dz/2.
+        # tv = tv*np.ones_like(temp)
+        # cluster_dict['dTHETAV_dz_MEAN'] = tv[mask]
 
         # Plume dw/dz, dp/dz, d theta_v/dz
         for var in ('DWDZ', 'DPDZ', 'THETAV_LAPSE'):
@@ -141,7 +143,7 @@ def plume_stats():
             cluster_dict['d_' + var[0] + '_dz'] = temp_result[mask]
 
         # Plume time
-        cluster_dict['TIME'] = ones_like(z[mask])*time_step*mc.dt
+        cluster_dict['TIME'] = np.ones_like(z[mask])*time_step*mc.dt
         
         # Data formatting
         for item in cluster_dict:
@@ -166,4 +168,4 @@ def plume_stats():
     np.save('npy/plume_time_stats.npy', stats)
 
 if __name__ == "__main__":
-    plume_stats()
+    plume_time_stats()

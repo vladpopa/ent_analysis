@@ -1,11 +1,9 @@
 #!/usr/bin/env python
-
 from netCDF4 import Dataset
 import numpy
-from ent_analysis.lib.thermo import SAM
+from lib.thermo import SAM
 import glob
-
-import ent_analysis.lib.model_param as mc
+import lib.model_param as mc
 
 def makechi(filename):
 	key = int(filename.split('/')[-1].split('_')[-1].split('.')[0])

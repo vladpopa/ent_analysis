@@ -8,11 +8,11 @@ try:
 except:
     import pickle
 import numpy.ma
-from ent_analysis.lib.thermo import SAM
-from ent_analysis.lib.thermo import thermo
-import ent_analysis.lib.model_param as mc
+from lib.thermo import SAM
+from lib.thermo import thermo
+import lib.model_param as mc
 
-def main():
+def condensed_time_stats():
     sample_types = ('CONDENSED', 'EDGE', 'SHELL', 'ENV',)
 
     stats_dict = {}
@@ -96,10 +96,13 @@ def main():
             cluster_dict[var + '_CONDENSED-ENV'] = cluster_dict[var + '_CONDENSED'] - cluster_dict[var + '_ENV']
             cluster_dict[var + '_CONDENSED-SHELL'] = cluster_dict[var + '_CONDENSED'] - cluster_dict[var + '_SHELL']
 
-        tv = stat_file.variables['THETAV'][l, :]
-        tv[1:-1] = (tv[2:]-tv[:-2])/mc.dz/2.
-        tv = tv*ones_like(temp)
-        cluster_dict['dTHETAV_dz_MEAN'] = tv[mask]
+        # TEMPORARY CLUDGE!!!!!!!!!!! **********************************************
+        # tv = stat_file.variables['THETAV'][time_step, :]
+        # tv = stat_file.variables['THETAV'][l, :3]
+        # #tv = stat_file.variables['THETAV'][l, :]
+        # tv[1:-1] = (tv[2:]-tv[:-2])/mc.dz/2.
+        # tv = tv*ones_like(temp)
+        # cluster_dict['dTHETAV_dz_MEAN'] = tv[mask]
 
         for var in ('DWDZ', 'DPDZ', 'THETAV_LAPSE'):
             temp = nc_files['CONDENSED'].variables[var][:]
@@ -171,5 +174,5 @@ def main():
     np.save('npy/condensed_time_stats.npy', stats)
         
 if __name__ == "__main__":
-    main()
+    condensed_time_stats()
 

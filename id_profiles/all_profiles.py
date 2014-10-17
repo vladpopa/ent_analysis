@@ -7,7 +7,7 @@ except:
 		from netCDF3 import Dataset
 	except:
 		from pupynere import netcdf_file as Dataset
-import ent_analysis.lib.model_param as mc
+import lib.model_param as mc
 
 def main(item):
     # Keep track of id encountered at previous time steps
@@ -52,7 +52,7 @@ def main(item):
                 tvar[l] = t
                 for name in ncfile.variables:
                     if name not in ('ids', 'z'):
-                        savefile.variables[name][l, :] = 
+                        savefile.variables[name][l, :] = \
                             ncfile.variables[name][n, :]
                 savefile.close()
                   
