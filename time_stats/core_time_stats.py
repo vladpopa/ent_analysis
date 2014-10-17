@@ -250,7 +250,12 @@ def main():
     for item in stats_dict:
         stats_dict[item] = np.hstack(stats_dict[item])
 
-    pickle.dump(stats_dict, open('pkl/core_time_stats.pkl', 'wb'))
+    # Save as recarray
+    n = len(stats_dict['z'])
+    stats = np.zeros(1, dtype = [(key, 'f8', n) for key in stats_dict])
+    for key in stats_dict:
+       stats[key] = stats_dict[key]
+    np.save('npy/core_time_stats.npy', stats)
         
 if __name__ == "__main__":
     main()

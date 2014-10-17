@@ -157,8 +157,13 @@ def plume_stats():
     # Data formatting
     for item in stats_dict:
         stats_dict[item] = np.hstack(stats_dict[item])
+    
+    # Save as recarray
+    n = len(stats_dict['z'])
+    stats = np.zeros(1, dtype = [(key, 'f8', n) for key in stats_dict])
+    for key in stats_dict:
+       stats[key] = stats_dict[key]
+    np.save('npy/plume_time_stats.npy', stats)
 
-    pickle.dump(stats_dict, open('pkl/plume_time_stats.pkl', 'wb'))
-        
 if __name__ == "__main__":
     plume_stats()
