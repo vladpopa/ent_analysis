@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import numpy as np
-from ent_analysis.lib.thermo import SAM
-import ent_analysis.lib.model_param as mc
-from ent_analysis.lib.thermo import thermo
+from lib.thermo import SAM
+import lib.model_param as mc
+from lib.thermo import thermo
 
 def area(data, k, j, i):
     return float(len(i))*mc.dx*mc.dy
@@ -92,9 +92,9 @@ def press(data, k, j, i):
 def relh(data, k, j, i):
     """Calculate relative humidity.
     """
-    return thermo.e(data['QV'][k, j, i]/1000., 
-        data['p'][k, np.newaxis, np.newaxis]*100.)/
-        thermo.e_star(data['TABS'][k, j, i])
+    return (thermo.e(data['QV'][k, j, i]/1000., \
+        data['p'][k, np.newaxis, np.newaxis]*100.)/ \
+        thermo.e_star(data['TABS'][k, j, i])).mean()
 
 def dwdt(data, k, j, i):
     return data['DWDT'][k, j, i].mean()
@@ -158,4 +158,3 @@ def vtetcld(data, k, j, i):
 
 def mftetcld(data, k, j, i):
     return data['MFTETCLD'][k, j, i].sum()*mc.dx*mc.dy*mc.dz
-
