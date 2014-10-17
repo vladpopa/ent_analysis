@@ -51,7 +51,7 @@ def main():
         cluster_dict['z'] = z[mask]
 
         # Calculate and store cloud thickness for each sample
-        # Use maked arrays to preserve axes; if z_min == z_max, thickness = dz
+        # Use masked arrays to preserve axes; if z_min == z_max, thickness = dz
         masked_z = np.ma.masked_where(area==0., z)
         depth = np.ones_like(z)*(masked_z.max(axis=1) - 
             masked_z.min(axis=1))[:, np.newaxis] + mc.dz
