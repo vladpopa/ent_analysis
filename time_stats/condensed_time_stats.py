@@ -57,12 +57,17 @@ def main():
             masked_z.min(axis=1))[:, np.newaxis] + mc.dz
         cluster_dict['depth'] = depth[mask]
 
-        # Calculate and store condensed shell relative humidity
-        r = condensed_shell_file.variables['QV'][:]
-        p = condensed_shell_file.variables['PRES'][:]
-        T = condensed_shell_file.variables['TABS'][:]
-        relh = thermo.e(r, p)/thermo.e_star(T)
-        cluster_dict['RELH_COND_SHELL'] = relh[mask]
+        # Condensed relative humidity
+        relh = nc_files['CONDENSED'].variables['RELH'][:]
+        cluster_dict['RELH'] = relh[mask]
+
+        # Condensed boundaries relative humidity
+        relh = nc_files['EDGE'].variables['RELH'][:]
+        cluster_dict['RELH_CONDENSED_EDGE'] = relh[mask]
+        relh = nc_files['SHELL'].variables['RELH'][:]
+        cluster_dict['RELH_CONDENSED_SHELL'] = relh[mask]
+        relh = nc_files['ENV'].variables['RELH'][:]
+        cluster_dict['RELH_CONDENSED_ENV'] = relh[mask]
 
         z = z*mask      
         zmax = np.ones_like(mask)*(z.max(1))[:, np.newaxis]        

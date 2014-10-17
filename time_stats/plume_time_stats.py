@@ -71,6 +71,14 @@ def plume_stats():
         relh = nc_files['PLUME'].variables['RELH'][:]
         cluster_dict['RELH'] = relh[mask]
 
+        # Plume boundaries relative humidity
+        relh = nc_files['EDGE'].variables['RELH'][:]
+        cluster_dict['RELH_PLUME_EDGE'] = relh[mask]
+        relh = nc_files['SHELL'].variables['RELH'][:]
+        cluster_dict['RELH_PLUME_SHELL'] = relh[mask]
+        relh = nc_files['ENV'].variables['RELH'][:]
+        cluster_dict['RELH_PLUME_ENV'] = relh[mask]
+        
         # Plume scaled z
         # ??????????????????????????????????
         z = z*mask      
