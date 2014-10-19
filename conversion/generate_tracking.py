@@ -1,82 +1,93 @@
 #!/usr/bin/env python
-"""
-This program generates a pkl file containing a list of dictionaries.
-Each dictionary in the list represents a cloudlet.
-The dictionaries have the structure:
-{'core': array of ints of core points,
-'plume': array of ints of plume points,
-'u_core': ,
-'v_core': ,
-'w_core': ,
-'u_plume': ,
-'v_plume': ,
-'w_plume': }
-pkl files are saved in cf/ subdirectory indexed by time
-"""
+"""Save core, condensed, plume, cold pool masks, 3D winds to netCDF file.
 
-import numpy
-import cPickle
-import sys
-from pylab import *
+Definitions:
+core - upward moving, buoyant, condensed
+condensed - condensed liquid water
+plume - defined following Couvreux et al. 2010
+cold pool - defined following Seigel 2014
+3d wind speeds - interpolated to account for Arakawa C grid
+
+netCDF file name:
+cloudtracker_input_[time].nc
+"""
+from __future__ import print_function
+import numpy as np
 from netCDF4 import Dataset
 import glob
-sys.path.append('/home/vpopa/repos/python')
 from lib.thermo import SAM
 import lib.model_param as mc
 
 def main(filename):
+    print(__doc__)
     time_step = mc.time_picker(filename)
-    
-    # Load all the data needed to calculation core, clouds, updrafts, cold pools
-    # at the current time_step.
+ 
+    # Load all the data needed to calculate core, condensed, plume and 
+    # cold pools at the current time_step
     nc_file = Dataset(filename)
 
-    tabs_field = nc_file.variables['TABS'][0,:].astype(double)
-    qv_field = nc_file.variables['QV'][0,:].astype(double)/1000.
-    qn_field = nc_file.variables['QN'][0,:].astype(double)/1000.
-    p_field = nc_file.variables['p'][:].astype(double)*100.
-    
+    tabs_field = nc_file.variables['TABS'][0,:].astype(np.double)
+    qv_field = nc_file.variables['QV'][0,:].astype(np.double)/1000.
+    qn_field = nc_file.variables['QN'][0,:].astype(np.double)/1000.
+    p_field = nc_file.variables['p'][:].astype(np.double)*100.
+
+    # Condensed field mask
     cloud_field = qn_field > 0.
 
-    thetav_field = SAM.theta_v(p_field[:, numpy.newaxis, numpy.newaxis],
-                               tabs_field, qv_field, qn_field, 0.)
+    # Core field mask
+    thetav_field = SAM.theta_v(
+        p_field[:, np.newaxis, np.newaxis], tabs_field, qv_field, qn_field, 0.)
                                
     buoy_field = (thetav_field > 
-         (thetav_field.mean(2).mean(1))[:, numpy.newaxis, numpy.newaxis])
+         (thetav_field.mean(2).mean(1))[:, np.newaxis, np.newaxis])
 
-    u_field = nc_file.variables['U'][0,:].astype(double)
+    u_field = nc_file.variables['U'][0,:].astype(np.double)
+    # Account for Arakawa C grid
     u_field[:, :-1, :] += u_field[:, 1:, :]
     u_field[:, -1, :] += u_field[:, 0, :]
     u_field = u_field/2.
 
-    v_field = nc_file.variables['V'][0,:].astype(double)
+    v_field = nc_file.variables['V'][0,:].astype(np.double)
+    # Account for Arakawa C grid
     v_field[:, :, :-1] += v_field[:, :, 1:]
     v_field[:, :, -1] += v_field[:, :, 0]
     v_field = v_field/2.
 
-    w_field = nc_file.variables['W'][0,:].astype(double)
+    w_field = nc_file.variables['W'][0,:].astype(np.double)
+    # Account for Arakawa C grid
     w_field[:-1, :, :] += w_field[1:, :, :]
     w_field[:-1, :, :] = w_field[:-1, :, :]/2.
 
     up_field = w_field > 0.
-
     core_field = up_field & buoy_field & cloud_field
 
-    tr_field = nc_file.variables['TR01'][0,:].astype(double)
-    x = nc_file.variables['x'][:].astype(double)
-    y = nc_file.variables['y'][:].astype(double)
-    z = nc_file.variables['z'][:].astype(double)
+    # Plume field mask; defined following Couvreux et al. 2010
+    tr_field = nc_file.variables['TR01'][0, :].astype(np.double)
+    x = nc_file.variables['x'][:].astype(np.double)
+    y = nc_file.variables['y'][:].astype(np.double)
+    z = nc_file.variables['z'][:].astype(np.double)
 
     nc_file.close()
 
     tr_mean = tr_field.reshape((len(z), len(y)*len(x))).mean(1)
-    tr_stdev = numpy.sqrt(tr_field.reshape((len(z), len(y)*len(x))).var(1))
-    tr_min = .05*numpy.cumsum(tr_stdev)/(numpy.arange(len(tr_stdev))+1)
+    tr_stdev = np.sqrt(tr_field.reshape((len(z), len(y)*len(x))).var(1))
+    tr_min = .05*np.cumsum(tr_stdev)/(np.arange(len(tr_stdev))+1)
     
-    # plume_field = (tr_field > numpy.max(numpy.array([tr_mean + tr_stdev, tr_min]), 0)[:, numpy.newaxis, numpy.newaxis]) & up_field
-    plume_field = (tr_field > numpy.max(numpy.array([tr_mean + tr_stdev, tr_min]), 0)[:, numpy.newaxis, numpy.newaxis])
+    # Toggle "upward moving" constraint
+    # plume_field = (tr_field > np.max(np.array([tr_mean + tr_stdev, tr_min]), \
+    #    0)[:, np.newaxis, np.newaxis]) & up_field
+    plume_field = (tr_field > np.max(np.array([tr_mean + tr_stdev, tr_min]), \
+        0)[:, np.newaxis, np.newaxis])
 
-    save_file = Dataset('%s/tracking/cloudtracker_input_%08g.nc' % (mc.data_directory, time_step), 'w')
+    # Cold pool mask; defined following Seigel 2014
+    coldpool_field = SAM.g*(thetav_field - \
+        (thetav_field.mean(2).mean(1))[:, np.newaxis, np.newaxis])/ \
+        (thetav_field.mean(2).mean(1))[:, np.newaxis, np.newaxis]
+    coldpool_field = (coldpool_field < -0.005)[0, :, :]
+
+    # Create netCDF file, dimensions and variables
+    save_file = Dataset('%s/tracking/cloudtracker_input_%08g.nc' % \
+        (mc.data_directory, time_step), 'w')
     
     save_file.createDimension('x', len(x))
     save_file.createDimension('y', len(y))
@@ -92,7 +103,9 @@ def main(filename):
     uvar = save_file.createVariable('u', 'f', ('z', 'y', 'x'))
     vvar = save_file.createVariable('v', 'f', ('z', 'y', 'x'))
     wvar = save_file.createVariable('w', 'f', ('z', 'y', 'x'))
+    coldpoolvar = save_file.createVariable('coldpool', 'i', ('y', 'x'))
 
+    # Save dimensions and variables
     xvar[:] = x[:]
     yvar[:] = y[:]
     zvar[:] = z[:]
@@ -103,14 +116,15 @@ def main(filename):
     uvar[:] = u_field[:]
     vvar[:] = v_field[:]
     wvar[:] = w_field[:]
+    coldpoolvar[:] = coldpool_field[:]
     
     save_file.close()
  
 if __name__ == "__main__":
-    filelist = glob.glob('%s/variables/*.nc' % mc.data_directory)
-    
+    filelist = glob.glob('%s/variables/*.nc' % mc.data_directory) 
     filelist.sort()
-    nt = len(filelist)   
+    nt = len(filelist)
+    
     for time_step, filename in enumerate(filelist):
-        print "time_step: " + str(time_step)
+        print('time_step: ' + str(time_step))
         main(filename)
