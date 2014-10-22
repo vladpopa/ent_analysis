@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from pylab import *
+from __future__ import print_function
 import numpy as np
 import cPickle
 from netCDF4 import Dataset
@@ -9,9 +9,9 @@ import lib.model_param as mc
 
 # Load mean cloud field statistics
 stat_file = Dataset(mc.get_stat())
-data = {'z': stat_file.variables['z'][:].astype(double),
-    'RHO' : stat_file.variables['RHO'][0,:].astype(double),
-    'PRES' : stat_file.variables['PRES'][0,:].astype(double)*100.}
+data = {'z': stat_file.variables['z'][:].astype(np.double),
+    'RHO' : stat_file.variables['RHO'][0,:].astype(np.double),
+    'PRES' : stat_file.variables['PRES'][0,:].astype(np.double)*100.}
 stat_file.close()
 
 def create_savefile(t, data, vars, profile_name):
@@ -48,11 +48,11 @@ def make_profiles(variables, cloud_data, vars, data, n):
     for item in temp:                
         temp_profile = {}
         for name in vars:
-            temp_profile[name] = zeros_like(data['z'][:])
+            temp_profile[name] = np.zeros_like(data['z'][:])
 
         indexes = cloud_data[item]
         if len(indexes) > 0:
-            # for each index find the index one level above and one level below
+            # For masks of top and bottom cloud surface
             indexes2 = indexes + mc.nx*mc.ny
             a = ~np.in1d(indexes, indexes2, assume_unique=True)
             indexes2 = indexes - mc.nx*mc.ny
@@ -60,8 +60,8 @@ def make_profiles(variables, cloud_data, vars, data, n):
         
             z, y, x = mc.index_to_zyx(indexes)
         
-            # same check one point in the horizontal, account for reentrant 
-            # domain
+            # Find masks of lateral boundaries in x direction; account for 
+            # reentrant domain
             x2  = (x+1) % mc.nx
             indexes2 = mc.zyx_to_index(z, y, x2)
             c = ~np.in1d(indexes, indexes2, assume_unique=True)
@@ -69,8 +69,8 @@ def make_profiles(variables, cloud_data, vars, data, n):
             indexes2 = mc.zyx_to_index(z, y, x2)
             d = ~np.in1d(indexes, indexes2, assume_unique=True)
 
-            # same check one point in the horizontal, account for reentrant 
-            # domain
+            # Find masks of lateral boundaries in y direction; account for 
+            # reentrant domain
             y2  = (y+1) % mc.ny
             indexes2 = mc.zyx_to_index(z, y2, x)
             e = ~np.in1d(indexes, indexes2, assume_unique=True)
@@ -78,11 +78,10 @@ def make_profiles(variables, cloud_data, vars, data, n):
             indexes2 = mc.zyx_to_index(z, y2, x)
             f = ~np.in1d(indexes, indexes2, assume_unique=True)
             
-            # up to this point we seem to have the x, y and z surfaces of the 
-            # cloud
-            
+            # Mask of cloud surface converted to dimensional units
             area = mc.dx*mc.dy*(a+b) + mc.dy*mc.dz*(c+d) + mc.dx*mc.dz*(e+f)
 
+            # Mask at each height and save surface areas
             for k in np.unique(z):
                 mask = z == k
                 temp_profile[temp[item]][k] = area[mask].sum()
@@ -107,7 +106,7 @@ def main(t):
 	savefile, variables = create_savefile(t, data, vars, 'surface')
 
 	for n, id in enumerate(ids):
-		print "time: ", t, " id: ", id
+		print("time: ", t, " id: ", id)
 		# Select the current cloud id
 		cloud = clouds[id]
 		make_profiles(variables, cloud, vars, data, n)

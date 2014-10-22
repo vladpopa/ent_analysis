@@ -36,7 +36,10 @@ def condensed_time_stats():
         mask_top = mask.copy()
         mask_top[:, 1:-1] = mask[:, 1:-1] & ~mask[:, 2:] & mask[:, :-2]
         mask_bottom = mask.copy()
+        # Account for case where condensed ends at top of domain
+        mask_bottom[-1] = False
         mask_bottom[:, 1:-1] = mask[:, 1:-1] & mask[:, 2:] & ~mask[:, :-2]
+        
         nc_files['EDGE'] = Dataset('../time_profiles/cdf/condensed_edge_profile_%08d.nc' % l)
         nc_files['SHELL'] = Dataset('../time_profiles/cdf/condensed_shell_profile_%08d.nc' % l)
         nc_files['ENV'] = Dataset('../time_profiles/cdf/condensed_env_profile_%08d.nc' % l)
@@ -71,9 +74,9 @@ def condensed_time_stats():
 
         z = z*mask      
         zmax = np.ones_like(mask)*(z.max(1))[:, np.newaxis]        
-        z[~mask] = 1e8
+        z[~mask] = 1e10
         zmin = np.ones_like(mask)*(z.min(1))[:, np.newaxis]
-        cluster_dict['z_scaled'] = ((z - zmin.min())/(zmax-zmin.min()))[mask]
+        cluster_dict['z_scaled'] = ((z - zmin)/(zmax - zmin))[mask]
 
         rho = nc_files['CONDENSED'].variables['RHO'][:]
         cluster_dict['RHO'] = rho[mask]
@@ -90,19 +93,16 @@ def condensed_time_stats():
                     temp = stat_file.variables[var][:]
                     if var == 'QT': 
                         temp = temp/1000.
-                    temp2 = nc_files['CONDENSED'].variables[var][:] - temp[l, :]
+                    temp2 = nc_files[type].variables[var][:] - temp[l, :]
                     cluster_dict[var + '_' + type + '-MEAN'] = temp2[mask]
                                 
             cluster_dict[var + '_CONDENSED-ENV'] = cluster_dict[var + '_CONDENSED'] - cluster_dict[var + '_ENV']
             cluster_dict[var + '_CONDENSED-SHELL'] = cluster_dict[var + '_CONDENSED'] - cluster_dict[var + '_SHELL']
 
-        # TEMPORARY CLUDGE!!!!!!!!!!! **********************************************
-        # tv = stat_file.variables['THETAV'][time_step, :]
-        # tv = stat_file.variables['THETAV'][l, :3]
-        # #tv = stat_file.variables['THETAV'][l, :]
-        # tv[1:-1] = (tv[2:]-tv[:-2])/mc.dz/2.
-        # tv = tv*ones_like(temp)
-        # cluster_dict['dTHETAV_dz_MEAN'] = tv[mask]
+        tv = stat_file.variables['THETAV'][l, :]
+        tv[1:-1] = (tv[2:]-tv[:-2])/mc.dz/2.
+        tv = tv*ones_like(mf)
+        cluster_dict['dTHETAV_dz_MEAN'] = tv[mask]
 
         for var in ('DWDZ', 'DPDZ', 'THETAV_LAPSE'):
             temp = nc_files['CONDENSED'].variables[var][:]

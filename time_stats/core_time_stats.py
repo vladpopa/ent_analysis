@@ -47,7 +47,7 @@ def core_time_stats():
         z = np.resize(z, mask.shape)
         cluster_dict['z'] = z[mask]
         
-        # Calculate and store cloud thickness for each sample
+        # Calculate and store core thickness for each sample
         # Use masked arrays to preserve axes; if z_min == z_max, thickness = dz
         masked_z = np.ma.masked_where(area==0., z)
         depth = np.ones_like(z)*(masked_z.max(axis=1) - 
@@ -79,7 +79,7 @@ def core_time_stats():
         zmax = np.ones_like(mask)*(z.max(1))[:, np.newaxis]        
         z[~mask] = 1e10
         zmin = np.ones_like(mask)*(z.min(1))[:, np.newaxis]
-        cluster_dict['z_scaled'] = ((z - zmin.min())/(zmax-zmin.min()))[mask]
+        cluster_dict['z_cb'] = ((z - zmin)/(zmax - zmin))[mask]
 
         rho = nc_files['CORE'].variables['RHO'][:]
         cluster_dict['RHO'] = rho[mask]
@@ -96,11 +96,11 @@ def core_time_stats():
                     temp = stat_file.variables[var][:]
                     if var == 'QT': 
                         temp = temp/1000.
-                    temp2 = nc_files['CORE'].variables[var][:] - temp[l, :]
+                    temp2 = nc_files[type].variables[var][:] - temp[l, :]
                     cluster_dict[var + '_' + type + '-MEAN'] = temp2[mask]
                                 
             cluster_dict[var + '_CORE-ENV'] = cluster_dict[var + '_CORE'] - cluster_dict[var + '_ENV']
-            # cluster_dict[var + '_CORE-SHELL'] = cluster_dict[var + '_CORE'] - cluster_dict[var + '_SHELL']
+            #cluster_dict[var + '_CORE-SHELL'] = cluster_dict[var + '_CORE'] - cluster_dict[var + '_SHELL']
 
         qsat = SAM.qsatw(nc_files['CORE'].variables['TABS'][:], 
                          nc_files['CORE'].variables['PRES'][:])
@@ -110,13 +110,10 @@ def core_time_stats():
         qsat_cb = ones_like(qsat)*qsat_cb[:, np.newaxis]
         cluster_dict['QSAT_CB'] = qsat_cb[mask]
         
-        # TEMPORARY CLUDGE!!!!!!!!!!! **********************************************
-        # tv = stat_file.variables['THETAV'][time_step, :]
-        #tv = stat_file.variables['THETAV'][l, :3]
-        # tv = stat_file.variables['THETAV'][l, :]
-        # tv[1:-1] = (tv[2:]-tv[:-2])/mc.dz/2.
-        # tv = tv*ones_like(temp)
-        # cluster_dict['dTHETAV_dz_MEAN'] = tv[mask]
+        tv = stat_file.variables['THETAV'][l, :]
+        tv[1:-1] = (tv[2:]-tv[:-2])/mc.dz/2.
+        tv = tv*ones_like(mf)
+        cluster_dict['dTHETAV_dz_MEAN'] = tv[mask]
 
         chi = chi_file.variables['chi_theta'][:]
         cluster_dict['CHI'] = chi[mask]
@@ -220,6 +217,8 @@ def core_time_stats():
         mask_top = mask.copy()
         mask_top[:, 1:-1] = mask[:, 1:-1] & ~mask[:, 2:] & mask[:, :-2]
         mask_bottom = mask.copy()
+        # Account for case where core ends at top of domain
+        mask_bottom[-1] = False
         mask_bottom[:, 1:-1] = mask[:, 1:-1] & mask[:, 2:] & ~mask[:, :-2]
 
         for var in (('MF', mf), 
@@ -262,4 +261,3 @@ def core_time_stats():
         
 if __name__ == "__main__":
     core_time_stats()
-

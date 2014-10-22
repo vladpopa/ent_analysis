@@ -19,7 +19,6 @@ from lib.thermo import SAM
 import lib.model_param as mc
 
 def main(filename):
-    print(__doc__)
     time_step = mc.time_picker(filename)
  
     # Load all the data needed to calculate core, condensed, plume and 
