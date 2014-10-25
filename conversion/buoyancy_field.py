@@ -39,7 +39,7 @@ def calculate_buoyancy(filename):
 
     # Create netCDF file, dimensions and variables
     save_file = Dataset(
-        '%s/tracking/buoyancy_%08g.nc' % (mc.data_directory, time_step), 'w')
+        '%s/buoyancy/buoyancy_%08g.nc' % (mc.data_directory, time_step), 'w')
     
     save_file.createDimension('x', len(x))
     save_file.createDimension('y', len(y))

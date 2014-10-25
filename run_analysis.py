@@ -43,7 +43,9 @@ def run_conversion():
         os.makedirs('%s/core_entrain/' % (mc.data_directory))
     if not os.path.exists('%s/condensed_entrain/' % (mc.data_directory)):
         os.makedirs('%s/condensed_entrain/' % (mc.data_directory))
-    
+    if not os.path.exists('%s/buoyancy/' % (mc.data_directory)):
+        os.makedirs('%s/buoyancy/' % (mc.data_directory))
+        
     # Generate cloud field statistics
     convert.convert_stat()
 
