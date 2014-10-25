@@ -113,23 +113,23 @@ def run_id_profiles():
 
     wrapper(pkg, 'all_profiles', 'main', profiles)
     
-def run_time_stats():
-    pkg = 'time_stats'
-    os.chdir('%s/time_stats' % (cwd))   
+def run_stats():
+    pkg = 'stats'
+    os.chdir('%s/stats' % (cwd))   
 
     # Ensure output folder exists
-    if not os.path.exists('%s/time_stats/npy' % (cwd)):
-        os.makedirs('%s/time_stats/npy' % (cwd))
+    if not os.path.exists('%s/stats/npy' % (cwd)):
+        os.makedirs('%s/stats/npy' % (cwd))
     
-    core_time_stats.core_time_stats()
-    condensed_time_stats.condensed_time_stats()
-    plume_time_stats.plume_time_stats()
+    core_stats.core_stats()
+    condensed_stats.condensed_stats()
+    plume_stats.plume_stats()
 
 if __name__ == '__main__':
     run_conversion()
     run_cloudtracker()
     run_profiler()
     run_id_profiles()
-    run_time_stats()
+    run_stats()
     
     print 'Entrainment analysis completed'

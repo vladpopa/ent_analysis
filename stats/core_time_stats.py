@@ -257,7 +257,7 @@ def core_time_stats():
     stats = np.zeros(1, dtype = [(key, 'f8', n) for key in stats_dict])
     for key in stats_dict:
        stats[key] = stats_dict[key]
-    np.save('npy/core_time_stats.npy', stats)
+    np.save('npy/core_stats.npy', stats)
         
 if __name__ == "__main__":
-    core_time_stats()
+    core_stats()

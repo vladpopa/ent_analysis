@@ -11,7 +11,7 @@ from lib.thermo import SAM
 from lib.thermo import thermo
 import lib.model_param as mc
 
-def plume_time_stats():
+def plume_stats():
     sample_types = ('PLUME', 'EDGE', 'SHELL', 'ENV')
 
     stats_dict = {}
@@ -168,7 +168,7 @@ def plume_time_stats():
     for key in stats_dict:
         stats[key] = stats_dict[key]
 
-    np.save('npy/plume_time_stats.npy', stats)
+    np.save('npy/plume_stats.npy', stats)
 
 if __name__ == "__main__":
-    plume_time_stats()
+    plume_stats()

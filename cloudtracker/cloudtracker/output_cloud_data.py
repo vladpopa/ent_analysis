@@ -196,5 +196,3 @@ def output_cloud_data(cloud_graphs, cloud_noise, t, MC):
     
 #    savedict = {'clouds': new_dict} 
 #    scipy.io.savemat('mat/cloud_data_%08g.mat' % t, savedict)
-    
-

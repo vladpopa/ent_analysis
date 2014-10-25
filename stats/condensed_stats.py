@@ -12,7 +12,7 @@ from lib.thermo import SAM
 from lib.thermo import thermo
 import lib.model_param as mc
 
-def condensed_time_stats():
+def condensed_stats():
     sample_types = ('CONDENSED', 'EDGE', 'SHELL', 'ENV',)
 
     stats_dict = {}
@@ -171,8 +171,8 @@ def condensed_time_stats():
     stats = np.zeros(1, dtype = [(key, 'f8', n) for key in stats_dict])
     for key in stats_dict:
        stats[key] = stats_dict[key]
-    np.save('npy/condensed_time_stats.npy', stats)
+    np.save('npy/condensed_stats.npy', stats)
         
 if __name__ == "__main__":
-    condensed_time_stats()
+    condensed_stats()
 
