@@ -6,10 +6,11 @@ from multiprocessing import Pool
 PROC = 16
 import lib.model_param as mc
 from conversion import convert, generate_tracking
+from conversion import buoyancy_field
 import cloudtracker.cloudtracker.main as cloudtracker
-import time_stats.core_time_stats as core_time_stats
-import time_stats.condensed_time_stats as condensed_time_stats
-import time_stats.plume_time_stats as plume_time_stats
+import stats.core_stats as core_stats
+import stats.condensed_stats as condensed_stats
+import stats.plume_stats as plume_stats
 
 # Default working directory for ent_analysis package
 cwd = os.getcwd()
@@ -57,8 +58,9 @@ def run_conversion():
     # generate_tracking
     filelist = glob.glob('%s/variables/*.nc' % (mc.data_directory))
     wrapper(pkg, 'generate_tracking', 'main', filelist)
-    for file_name in filelist:
-        generate_tracking.main(file_name)
+        
+    # Calculate buoyancy field
+    wrapper(pkg, 'buoyancy_field', 'calculate_buoyancy', filelist)
 
 def run_cloudtracker():
     # Change the working directory for cloudtracker

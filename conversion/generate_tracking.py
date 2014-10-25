@@ -1,11 +1,10 @@
 #!/usr/bin/env python
-"""Save core, condensed, plume, cold pool masks, 3D winds to netCDF file.
+"""Save core, condensed and plume masks, 3D winds to netCDF file.
 
 Definitions:
 core - upward moving, buoyant, condensed
 condensed - condensed liquid water
 plume - defined following Couvreux et al. 2010
-cold pool - defined following Seigel 2014
 3d wind speeds - interpolated to account for Arakawa C grid
 
 netCDF file name:
@@ -78,12 +77,6 @@ def main(filename):
     plume_field = (tr_field > np.max(np.array([tr_mean + tr_stdev, tr_min]), \
         0)[:, np.newaxis, np.newaxis])
 
-    # Cold pool mask; defined following Seigel 2014
-    coldpool_field = SAM.g*(thetav_field - \
-        (thetav_field.mean(2).mean(1))[:, np.newaxis, np.newaxis])/ \
-        (thetav_field.mean(2).mean(1))[:, np.newaxis, np.newaxis]
-    coldpool_field = (coldpool_field < -0.005)[0, :, :]
-
     # Create netCDF file, dimensions and variables
     save_file = Dataset('%s/tracking/cloudtracker_input_%08g.nc' % \
         (mc.data_directory, time_step), 'w')
@@ -102,7 +95,6 @@ def main(filename):
     uvar = save_file.createVariable('u', 'f', ('z', 'y', 'x'))
     vvar = save_file.createVariable('v', 'f', ('z', 'y', 'x'))
     wvar = save_file.createVariable('w', 'f', ('z', 'y', 'x'))
-    coldpoolvar = save_file.createVariable('coldpool', 'i', ('y', 'x'))
 
     # Save dimensions and variables
     xvar[:] = x[:]
@@ -115,7 +107,6 @@ def main(filename):
     uvar[:] = u_field[:]
     vvar[:] = v_field[:]
     wvar[:] = w_field[:]
-    coldpoolvar[:] = coldpool_field[:]
     
     save_file.close()
  
