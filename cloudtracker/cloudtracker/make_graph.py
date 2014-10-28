@@ -49,7 +49,8 @@ def make_graph(MC):
     merges = {}
     splits = {}
 
-    for t in range(MC['nt']):
+    # for t in range(MC['nt']):
+    for t in range(3):
 
         clusters = cPickle.load(open('pkl/clusters_%08g.pkl' % t, 'rb'))
 
@@ -151,25 +152,20 @@ def make_graph(MC):
         if len(plume_time) < 2*60/MC['dt']:
             cloud_noise.append(subgraph)
         else:
-            cloud_graphs.append((plume_volume, subgraph))
             plume_time = list(plume_time)
             plume_time.sort()
             condensed_time = list(condensed_time)
             condensed_time.sort()
             core_time = list(core_time)
             core_time.sort()
-            cloud_times.append(
-                (plume_volume, plume_time, condensed_time, core_time))
-
+            cloud_graphs.append((plume_volume, subgraph, plume_time, condensed_time, core_time))
+    
     # Cloud with largest condensed volume sorted largest to smallest; volume not 
     # used any further
     cloud_graphs.sort()
     cloud_graphs.reverse()
+    cloud_times = [item[2:] for item in cloud_graphs]  
     cloud_graphs = [item[1] for item in cloud_graphs]
-    cloud_times.sort()
-    cloud_times.reverse()
-    cloud_times = [item[1:] for item in cloud_times]
-    
     if full_output: full_output(cloud_times, cloud_graphs, merges, splits, MC)
 
     return cloud_graphs, cloud_noise
