@@ -3,7 +3,7 @@ import glob, os, sys
 # Multiprocessing modules
 import multiprocessing as mp
 from multiprocessing import Pool
-PROC = 16
+PROC = 32
 import lib.model_param as mc
 from conversion import convert, generate_tracking
 from conversion import buoyancy_field
@@ -43,9 +43,7 @@ def run_conversion():
         os.makedirs('%s/core_entrain/' % (mc.data_directory))
     if not os.path.exists('%s/condensed_entrain/' % (mc.data_directory)):
         os.makedirs('%s/condensed_entrain/' % (mc.data_directory))
-    if not os.path.exists('%s/buoyancy/' % (mc.data_directory)):
-        os.makedirs('%s/buoyancy/' % (mc.data_directory))
-        
+
     # Generate cloud field statistics
     convert.convert_stat()
 
@@ -60,7 +58,7 @@ def run_conversion():
     # generate_tracking
     filelist = glob.glob('%s/variables/*.nc' % (mc.data_directory))
     wrapper(pkg, 'generate_tracking', 'main', filelist)
-        
+
     # Calculate buoyancy field
     wrapper(pkg, 'buoyancy_field', 'calculate_buoyancy', filelist)
 

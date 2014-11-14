@@ -49,9 +49,7 @@ def make_graph(MC):
     merges = {}
     splits = {}
 
-    # for t in range(MC['nt']):
-    for t in range(3):
-
+    for t in range(MC['nt']):
         clusters = cPickle.load(open('pkl/clusters_%08g.pkl' % t, 'rb'))
 
         for id in clusters:
@@ -94,7 +92,7 @@ def make_graph(MC):
 
         # If cloud exists for less than 5 minutes, check if it has split events
         # If it has split events, remove them and reconnect the cloud
-        if len(times) < 5*60/MC['dt']:
+        if (len(times) < 5*60/MC['dt']) & (len(times) > 0):
             for node in subgraph:
                 if subgraph.node[node]['split']:
                     item = subgraph.node[node]['split'].pop()
@@ -109,7 +107,7 @@ def make_graph(MC):
                 times.add(int(node[:8]))
 
         # If a cloud exists less than 5 minutes, check for merge events
-        if len(times) < 5*60/MC['dt']:
+        if (len(times) < 5*60/MC['dt']) & (len(times) > 0):
             for node in subgraph:
                 if subgraph.node[node]['merge']:
                     item = subgraph.node[node]['merge'].pop()
