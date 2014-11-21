@@ -140,7 +140,7 @@ def find_mean_cloudlet_velocity(cloudlets, u, v, w, MC):
             u_mean = u[K, J, I].mean()-ug
             v_mean = v[K, J, I].mean()-vg
             w_mean = w[K, J, I].mean()
-            # Units are grid cells/time step
+            # Units are grid cells/snapshot interval
             cloudlet['u_condensed'] = round(u_mean*dt/dx)
             cloudlet['v_condensed'] = round(v_mean*dt/dy)
             cloudlet['w_condensed'] = round(w_mean*dt/dz)
@@ -157,7 +157,7 @@ def find_mean_cloudlet_velocity(cloudlets, u, v, w, MC):
         u_mean = u[K, J, I].mean()-ug
         v_mean = v[K, J, I].mean()-vg
         w_mean = w[K, J, I].mean()
-        # Units are grid cells/time step        
+        # Units are grid cells/snapshot interval        
         cloudlet['u_plume'] = round(u_mean*dt/dx)
         cloudlet['v_plume'] = round(v_mean*dt/dy)
         cloudlet['w_plume'] = round(w_mean*dt/dz)
