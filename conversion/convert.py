@@ -8,6 +8,7 @@ CONVERTER = SAM + '/UTIL/bin3D2nc '
 ############################
 ### No need to edit the following script
 def convert(filename):
+	print(CONVERTER + filename)
 	result = os.system(CONVERTER + filename)
 	print result
 	
@@ -15,7 +16,7 @@ def convert(filename):
 		print "Process aborted."
 		
 def convert_stat():
-	stat_name = glob.iglob(SAM + '/OUT_STAT/%s*.stat' % mc.case_name).next()	
+	stat_name = glob.iglob(SAM + '/OUT_STAT/%s*.stat' % mc.case_name).next()
 	print "Converting stat file..."
 	print stat_name
 	

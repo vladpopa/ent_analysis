@@ -5,4 +5,4 @@
 #PBS -N ent_analysis
 
 cd /home/vpopa/repos/ent_analysis/
-python -O -B ./run_analysis.py
+/users/CLUSTER/cluster-usr/mpiexec/bin/mpiexec python -O -B ./run_analysis.py

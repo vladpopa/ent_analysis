@@ -12,7 +12,7 @@ from lib.thermo import SAM
 from lib.thermo import thermo
 import lib.model_param as mc
 
-def core_time_stats():
+def core_stats():
     sample_types = ('CORE', 'ENV', 'PLUME')
 
     stats_dict = {}

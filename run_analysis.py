@@ -43,24 +43,27 @@ def run_conversion():
         os.makedirs('%s/core_entrain/' % (mc.data_directory))
     if not os.path.exists('%s/condensed_entrain/' % (mc.data_directory)):
         os.makedirs('%s/condensed_entrain/' % (mc.data_directory))
-
+    if not os.path.exists('%s/buoyancy/' % (mc.data_directory)):
+        os.makedirs('%s/buoyancy/' % (mc.data_directory))
+        
     # Generate cloud field statistics
-    convert.convert_stat()
+#    convert.convert_stat()
 
     # bin3d2nc conversion
-    filelist = glob.glob('%s/*.bin3D' % mc.input_directory)
-    wrapper(pkg, 'convert', 'convert', filelist)
+#    filelist = glob.glob('%s/*.bin3D' % mc.input_directory)
+#    wrapper(pkg, 'convert', 'convert', filelist)
 
     # Move the netCDF files to relevant locations
-    filelist = glob.glob('./*.nc')
-    wrapper(pkg, 'nc_transfer', 'transfer', filelist)
+#    filelist = glob.glob('./*.nc')
+#    wrapper(pkg, 'nc_transfer', 'transfer', filelist)
 
     # generate_tracking
-    filelist = glob.glob('%s/variables/*.nc' % (mc.data_directory))
-    wrapper(pkg, 'generate_tracking', 'main', filelist)
+#    filelist = glob.glob('%s/variables/*.nc' % (mc.data_directory))
+#    wrapper(pkg, 'generate_tracking', 'main', filelist)
 
     # Calculate buoyancy field
-    wrapper(pkg, 'buoyancy_field', 'calculate_buoyancy', filelist)
+#    filelist = glob.glob('%s/variables/*.nc' % (mc.data_directory))
+#    wrapper(pkg, 'buoyancy_field', 'calculate_buoyancy', filelist)
 
 def run_cloudtracker():
     # Change the working directory for cloudtracker
@@ -82,7 +85,7 @@ def run_profiler():
     # Ensure output folder exists
     if not os.path.exists('%s/time_profiles/cdf' % (cwd)):
         os.makedirs('%s/time_profiles/cdf' % (cwd))
-        
+
     # Main thermodynamic profiles
     filelist = glob.glob('%s/variables/*.nc' % (mc.data_directory))
     wrapper(pkg, 'make_profiles', 'main', filelist)
@@ -108,7 +111,7 @@ def run_id_profiles():
     # ID Profiles
     pkg = 'id_profiles'
     os.chdir('%s/id_profiles' % (cwd))
-
+ 
     # Ensure output folder exists
     if not os.path.exists('%s/id_profiles/cdf' % (cwd)):
         os.makedirs('%s/id_profiles/cdf' % (cwd))
@@ -118,7 +121,7 @@ def run_id_profiles():
 def run_stats():
     pkg = 'stats'
     os.chdir('%s/stats' % (cwd))   
-
+ 
     # Ensure output folder exists
     if not os.path.exists('%s/stats/npy' % (cwd)):
         os.makedirs('%s/stats/npy' % (cwd))

@@ -26,9 +26,9 @@ data_directory = model_config[ 'data_directory']
 sam_directory = model_config['sam_directory']
 
 if(do_entrainment):
-    nt = len( glob.glob('%s/%s_CORE_*' % (input_directory, case_name)))
+    nt = len( glob.glob('%s/*_CORE_*' % (input_directory)))
 else:
-    nt = len( glob.glob('%s/%s_[!A-Z]*' % (input_directory, case_name)))
+    nt = len( glob.glob('%s/*_[!A-Z]*' % (input_directory)))
 
 def get_stat():
     filename = glob.iglob(data_directory + '/%s*_stat.nc' % case_name).next()
